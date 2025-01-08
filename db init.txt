@@ -1,14 +1,18 @@
-create schema stumble;
-use stumble;
+CREATE DATABASE IF NOT EXISTS stumble;
+USE stumble;
+
+DROP TABLE IF EXISTS user;
 
 CREATE TABLE user (
-    user_id INT NOT NULL,
-    user_name TEXT NOT NULL,
+    user_id INT AUTO_INCREMENT NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    gender VARCHAR(6),
     age INT,
+    bio TEXT,
     strengths TEXT,
     weaknesses TEXT,
     collab_count INT DEFAULT 0,
-    bio TEXT,
     PRIMARY KEY (user_id)
 );
-
