@@ -21,13 +21,13 @@ bcrypt = Bcrypt(app)
 #######################################################################
 # ROUTES
 #######################################################################
-
+ 
 @app.route('/')
 def root():
     """Redirect to home or login depending on session."""
-    if 'user_id' in session:
-        return redirect(url_for('home'))
-    return redirect(url_for('login'))
+    #if 'user_id' in session:
+    #    return redirect(url_for('home'))
+    return render_template('index.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])

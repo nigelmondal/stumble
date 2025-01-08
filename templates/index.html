@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stumble</title>
+    <!-- Font Awesome for icons (optional, can be removed if not used) -->
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
+    <!-- Link to external stylesheet (optional) -->
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="shortcut icon" href="R (2).png" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Raleway, sans-serif;
+        }
+
+        /* Page background: solid #F5F5DC */
+        body {
+            background-color: #F5F5DC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Title styling */
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            font-size: 45px;
+            font-weight: 700;
+            color: #1f453d;
+        }
+
+        /* Buttons container */
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Button styling */
+        .btn {
+            background: #1f453d; /* Button background color */
+            color: #F5F5DC; /* Beige font color */
+            font-size: 18px;
+            padding: 15px 30px;
+            border: none; /* Removed border */
+            border-radius: 30px;
+            cursor: pointer;
+            width: 200px;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 700;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
+        }
+
+        .btn:hover {
+            background: #164030; /* Darker shade on hover */
+            color: #F5F5DC; /* Maintain beige font color */
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .btn {
+                width: 150px;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            .title {
+                font-size: 28px;
+                left: 20px;
+            }
+        }
+
+        /* Optional: Decorative shapes similar to login/register pages */
+        .shape-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        .shape {
+            position: absolute;
+            transform: rotate(45deg);
+            border-radius: 20px;
+            opacity: 0.1; /* Reduced opacity for subtlety */
+        }
+
+        .shape1 {
+            background: #1f453d; /* Dark shade to contrast with background */
+            height: 300px;
+            width: 300px;
+            top: -80px;
+            right: -80px;
+        }
+
+        .shape2 {
+            background: #1f453d; /* Dark shade to contrast with background */
+            height: 150px;
+            width: 150px;
+            bottom: -60px;
+            left: -60px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Page Title -->
+    <div class="title">STUMBLE</div>
+
+    <!-- Optional decorative shapes -->
+    <div class="shape-container">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+    </div>
+
+    <!-- Buttons Container -->
+    <div class="buttons-container">
+        <a href="{{ url_for('login') }}" class="btn">
+            Login
+        </a>
+        <a href="{{ url_for('register') }}" class="btn">
+            Register
+        </a>
+    </div>
+</body>
+
+</html>

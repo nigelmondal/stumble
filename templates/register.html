@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Register Form</title>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <!-- Font Awesome for icons -->
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
     <style>
         @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
 
@@ -12,209 +14,225 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Raleway', sans-serif;
+            font-family: Raleway, sans-serif;
         }
 
         body {
-            background: linear-gradient(90deg, #1E1E2F, #1C1C3C);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            /* Updated background to shades of #F5F5DC */
+            background: linear-gradient(90deg, #064927, #eae8d5);
         }
 
         .container {
-            background: linear-gradient(90deg, #212A6D, #151B54);
-            width: 500px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.6);
-            padding: 40px 60px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header img {
-            width: 80px;
-            margin-bottom: 10px;
-        }
-
-        .header h2 {
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .form {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            min-height: 200vh;
         }
 
-        .form-group {
+        .screen {
+            /* Updated form interior with shades of #1f453d */
+            background: linear-gradient(90deg, #1f453d, #164030);
             position: relative;
+            height: 1000px; /* Adjusted height for more content */
+            width: 500px;
+            box-shadow: 0px 0px 24px #000;
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        .form-group i {
+        .screen__content {
+            z-index: 2;
+            position: relative;
+            height: 100%;
+        }
+
+        .screen__background {
             position: absolute;
-            top: 50%;
-            left: 10px;
-            transform: translateY(-50%);
-            color: #6D8BFF;
-            pointer-events: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index:0;
+            -webkit-clip-path: inset(0 0 0 0);
+            clip-path: inset(0 0 0 0);
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 15px 20px 15px 50px;
-            background: none;
-            border: 2px solid #2F365F;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            appearance: none;
+        .screen__background__shape {
+            transform: rotate(45deg);
+            position: absolute;
         }
 
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-            color: #ccc;
-            font-family: 'Raleway', sans-serif;
-            font-size: 16px;
+        .screen__background__shape1 {
+            height: 520px;
+            width: 520px;
+            background: #d1d1c6; /* Light shade of #F5F5DC */
+            top: -50px;
+            right: 120px;
+            border-radius: 0 72px 0 0;
         }
 
-        .form-group textarea {
-            resize: none;
-            height: 100px;
+        .screen__background__shape2 {
+            height: 220px;
+            width: 220px;
+            background: #f5f5dc; /* Light shade of #F5F5DC */
+            top: -172px;
+            right: 0;
+            border-radius: 32px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #6D8BFF;
+        .screen__background__shape3 {
+            height: 540px;
+            width: 190px;
+            background: linear-gradient(270deg, #1f453d, #164030);
+            top: -36px;
+            right: 0;
+            border-radius: 32px;
         }
 
-        .custom-file-upload {
-            display: inline-block;
-            padding: 15px 20px;
-            color: #fff;
-            background: #6D8BFF;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s ease;
+        .screen__background__shape4 {
+            height: 200px;
+            width: 200px;
+            background: #1f453d;
+            top: 420px;
+            right: 50px;
+            border-radius: 60px;
+        }
+
+        .register {
+            width: 320px;
+            padding: 30px;
+            margin: auto;
+            padding-top: 100px;
             text-align: center;
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 10px;
-            width: 100%;
         }
 
-        .custom-file-upload:hover {
-            background: #5673D0;
+        .register__logo {
+            display: block;
+            margin: 0 auto 30px auto;
+            width: 120px;
         }
 
-        .file-input {
-            display: none;
+        .register__field {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #2F365F;
+            padding: 10px 0;
+            margin: 15px 0;
         }
 
-        .submit-button {
-            width: 100%;
-            padding: 15px 20px;
-            background: #6D8BFF;
-            border: none;
-            border-radius: 30px;
+        .register__icon {
             font-size: 18px;
-            font-weight: bold;
-            color: #fff;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.3s ease;
+            color: #1f453d;
+            margin-right: 10px;
         }
 
-        .submit-button:hover {
-            background: #5673D0;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 100%;
-                padding: 20px 30px;
-            }
-        }
-
-        .form-group select {
-            appearance: none;
+        .register__input {
+            border: none;
             background: none;
-            color: #fff;
-            padding: 15px 20px 15px 50px;
-            border: 2px solid #2F365F;
-            border-radius: 5px;
+            font-size: 18px;
+            color: #1f453d;
+            font-weight: 600;
+            flex: 1;
+            padding: 8px 0;
+        }
+
+        .register__input:focus {
+            outline: none;
+        }
+
+        .register__input::placeholder {
+            color: #1f453d;
+        }
+
+        .register__submit {
+            background: #f5f5dc;
+            color: #1f453d;
             font-size: 16px;
-            font-weight: normal;
+            margin-top: 30px;
+            padding: 16px 20px;
+            border-radius: 26px;
+            border: none;
+            text-transform: uppercase;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
             cursor: pointer;
+            transition: background 0.2s, color 0.2s;
         }
 
-        .form-group select option {
-            background: #212A6D;
-            color: #fff;
-            font-weight: normal;
+        .register__submit:hover {
+            background: #dcdcbf; /* Slightly darker shade on hover */
+            color: #164030; /* Darker text on hover */
         }
 
-        .form-group select option[disabled] {
-            color: #ccc;
+        .button__icon {
+            font-size: 20px;
+            margin-left: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="header">
-            <img src="/static/images/logo.jpg" alt="Logo">
-            <h2>Register Now</h2>
+        <div class="screen">
+            <div class="screen__content">
+                <form id="registerForm" class="register" method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
+                    <h1>STUMBLE</h1>
+                    <br>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-user-circle"></i>
+                        <input type="text" name="name" id="name" class="register__input" placeholder="Full Name" required>
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-envelope"></i>
+                        <input type="email" name="email" id="email" class="register__input" placeholder="Email" required>
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-lock"></i>
+                        <input type="password" name="password" id="password" class="register__input" placeholder="Password" required>
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-venus-mars"></i>
+                        <select name="gender" id="gender" class="register__input" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-info-circle"></i>
+                        <textarea name="biography" id="biography" class="register__input" placeholder="Write a short biography"></textarea>
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-paint-brush"></i>
+                        <input type="text" name="strengths" id="strengths" class="register__input" placeholder="Strengths (e.g., English, Stats)">
+                    </div>
+                    <div class="register__field">
+                        <i class="register__icon fas fa-film"></i>
+                        <input type="text" name="weaknesses" id="weaknesses" class="register__input" placeholder="Weaknesses (e.g., Math, Coding)">
+                    </div>
+                    <button type="submit" class="register__submit">
+                        <span class="button__text">Register Now</span>
+                        <i class="button__icon fas fa-chevron-right"></i>
+                    </button>
+                </form>
+            </div>
+            <!-- Interior Shapes -->
+            <div class="screen__background">
+                <span class="screen__background__shape screen__background__shape4"></span>
+                <span class="screen__background__shape screen__background__shape3"></span>
+                <span class="screen__background__shape screen__background__shape2"></span>
+                <span class="screen__background__shape screen__background__shape1"></span>
+            </div>
         </div>
-        <form id="registerForm" class="form" method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
-            <div class="form-group">
-                <i class="fas fa-user-circle"></i>
-                <input type="text" name="name" id="name" placeholder="Full Name" required>
-            </div>
-            <div class="form-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" name="email" id="email" placeholder="Email" required>
-            </div>
-            <div class="form-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" id="password" placeholder="Password" required>
-            </div>
-            <div class="form-group">
-                <i class="fas fa-venus-mars"></i>
-                <select name="gender" id="gender" required>
-                    <option value="" disabled selected style="color: #ccc;">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <i class="fas fa-info-circle"></i>
-                <textarea name="biography" id="biography" placeholder="Write a short biography"></textarea>
-            </div>
-            <div class="form-group">
-                <i class="fas fa-paint-brush"></i>
-                <input type="text" name="strengths" id="strengths" placeholder="Strengths (e.g., English, Stats)">
-            </div>
-            <div class="form-group">
-                <i class="fas fa-film"></i>
-                <input type="text" name="weaknesses" id="weaknesses" placeholder="weaknesses (e.g., Math, Coding)">
-            </div>
-            <button type="submit" class="submit-button">Register Now</button>
-        </form>
     </div>
 
     <script>
@@ -248,7 +266,6 @@
                 event.preventDefault();
                 return;
             }
-            // Additional checks can be added (password length, etc.)
         });
     </script>
 </body>
