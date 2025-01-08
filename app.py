@@ -118,6 +118,51 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/add_strength', methods=['POST'])
+def add_strength():
+    if 'user_id' not in session:
+        flash('Please log in first.')
+        return redirect(url_for('login'))
+
+    new_strength = request.form.get('newStrength')
+    user_id = session['user_id']
+
+    # Append the new strength to the existing list
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT strengths FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+    if row and new_strength:
+        old_strengths = row['strengths'] or ''
+        updated_strengths = (old_strengths + ',' + new_strength).strip(',')  # handle edge cases
+        cur.execute("UPDATE user SET strengths=%s WHERE user_id=%s", (updated_strengths, user_id))
+        mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('home'))
+
+
+@app.route('/add_weakness', methods=['POST'])
+def add_weakness():
+    if 'user_id' not in session:
+        flash('Please log in first.')
+        return redirect(url_for('login'))
+
+    new_weakness = request.form.get('newWeakness')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT weaknesses FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+    if row and new_weakness:
+        old_weaknesses = row['weaknesses'] or ''
+        updated_weaknesses = (old_weaknesses + ',' + new_weakness).strip(',')
+        cur.execute("UPDATE user SET weaknesses=%s WHERE user_id=%s", (updated_weaknesses, user_id))
+        mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('home'))
+
+
 
 #######################################################################
 # RUN

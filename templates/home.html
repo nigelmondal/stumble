@@ -5,6 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stumble - Home</title>
     <link rel="stylesheet" href= "static/style.css">
+
+    <style>
+        /* Basic modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; 
+            z-index: 999; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 20px;
+            width: 50%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: red;
+        }
+        .popup-form label {
+            display: block;
+            margin-top: 10px;
+        }
+        .popup-form input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .popup-form button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #1f453d;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .popup-form button:hover {
+            background: #2a5c4d;
+        }
+    </style>
+    
 </head>
 <body>
     <div class="side-panel">
@@ -18,13 +72,13 @@
         <div class="user-info">
             <h1>Welcome, {{ user['full_name'] }}!</h1>
             <span>⭐ 4.5/5 | Age: 25</span>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a>
         </div>
         <hr>
         <div class="section">
             <div class="section-header">
                 <span>My Strengths</span>
-                <a href="#">+</a>
+                <a href="#" onclick="openModal('strengthModal')">+</a>
             </div>
             <div class="bubbles" id="strengths">
                 {% for strength in user['strengths'].split(',') %}
@@ -35,7 +89,7 @@
         <div class="section">
             <div class="section-header">
                 <span>My Weaknesses</span>
-                <a href="#">+</a>
+                <a href="#" onclick="openModal('weaknessModal')">+</a>
             </div>
             <div class="bubbles" id="weaknesses">
                 {% for weakness in user['weaknesses'].split(',') %}
@@ -44,5 +98,49 @@
             </div>
         </div>
     </div>
+
+    <div id="strengthModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('strengthModal')">&times;</span>
+            <h2>Add a New Strength</h2>
+            <form class="popup-form" method="POST" action="{{ url_for('add_strength') }}">
+                <label for="newStrength">Strength:</label>
+                <input type="text" id="newStrength" name="newStrength">
+                <button type="submit">Add</button>
+            </form>            
+        </div>
+    </div>
+
+    <div id="weaknessModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('weaknessModal')">&times;</span>
+            <h2>Add a New Weakness</h2>
+            <form class="popup-form" method="POST" action="{{ url_for('add_weakness') }}">
+                <label for="newWeakness">Weakness:</label>
+                <input type="text" id="newWeakness" name="newWeakness">
+                <button type="submit">Add</button>
+            </form>            
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        // Close the modal if user clicks anywhere outside of it
+        window.onclick = function(event) {
+            const strengthModal = document.getElementById('strengthModal');
+            const weaknessModal = document.getElementById('weaknessModal');
+            if (event.target == strengthModal) {
+                strengthModal.style.display = 'none';
+            }
+            if (event.target == weaknessModal) {
+                weaknessModal.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

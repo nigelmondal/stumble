@@ -211,22 +211,22 @@
 	<div class="container">
 		<div class="screen">
 			<div class="screen__content">
-				<form class="login" method="post" action="{{ url_for('login')}}">
-					<img src="/static/images/logo.jpg" alt="Logo" class="login__logo" >
-					<div class="login__field">
-						<i class="login__icon fas fa-user"></i>
-						<input name="email" type="email" class="login__input" placeholder="Email">
-					</div>
-					<div class="login__field">
-						<i class="login__icon fas fa-lock"></i>
-						<input type="password" name="password" class="login__input" placeholder="Password">
-					</div>
-					<button class="button login__submit" type="submit">
-						<span class="button__text">Log In Now</span>
-						<i class="button__icon fas fa-chevron-right"></i>
-					</button>
-				</form>
-			</div>
+                <form id="loginForm" class="login" method="post" action="{{ url_for('login')}}">
+                    <img src="/static/images/logo.jpg" alt="Logo" class="login__logo" >
+                    <div class="login__field">
+                        <i class="login__icon fas fa-user"></i>
+                        <input id="email" name="email" type="email" class="login__input" placeholder="Email">
+                    </div>
+                    <div class="login__field">
+                        <i class="login__icon fas fa-lock"></i>
+                        <input id="password" type="password" name="password" class="login__input" placeholder="Password">
+                    </div>
+                    <button class="button login__submit" type="submit">
+                        <span class="button__text">Log In Now</span>
+                        <i class="button__icon fas fa-chevron-right"></i>
+                    </button>
+                </form>
+            </div>
 			<div class="screen__background">
 				<span class="screen__background__shape screen__background__shape4"></span>
 				<span class="screen__background__shape screen__background__shape3"></span>
@@ -235,6 +235,28 @@
 			</div>
 		</div>
 	</div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+
+            if (emailField.value.trim() === '') {
+                alert('Please enter your email.');
+                emailField.focus();
+                event.preventDefault();
+                return;
+            }
+            if (passwordField.value.trim() === '') {
+                alert('Please enter your password.');
+                passwordField.focus();
+                event.preventDefault();
+                return;
+            }
+            // If both fields are non-empty, allow form submission
+        });
+    </script>
+    
 </body>
 
 </html>
