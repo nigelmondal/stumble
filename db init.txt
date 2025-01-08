@@ -1,0 +1,14 @@
+create schema stumble;
+use stumble;
+
+CREATE TABLE user (
+    user_id INT NOT NULL,
+    user_name TEXT NOT NULL,
+    age INT,
+    strengths TEXT,
+    weaknesses TEXT,
+    collab_count INT DEFAULT 0,
+    bio TEXT,
+    PRIMARY KEY (user_id)
+);
+
