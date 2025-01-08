@@ -39,6 +39,7 @@
             font-size: 45px;
             font-weight: 700;
             color: #1f453d;
+            z-index: 2; /* Ensure title is above shapes */
         }
 
         /* Buttons container */
@@ -47,6 +48,8 @@
             flex-direction: column;
             gap: 20px;
             align-items: center;
+            z-index: 2; /* Ensure buttons are above shapes */
+            position: relative; /* Required for z-index to work */
         }
 
         /* Button styling */
@@ -64,6 +67,8 @@
             font-weight: 700;
             transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
+            text-decoration: none; /* Remove underline from links */
+            display: block; /* Ensure links behave like buttons */
         }
 
         .btn:hover {
@@ -94,7 +99,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            z-index: 0;
+            z-index: 1; /* Ensure shapes are below buttons and title */
             overflow: hidden;
             border-radius: 15px;
         }
@@ -132,7 +137,7 @@
     <div class="shape-container">
         <div class="shape shape1"></div>
         <div class="shape shape2"></div>
-    </div>
+    </div>  
 
     <!-- Buttons Container -->
     <div class="buttons-container">
