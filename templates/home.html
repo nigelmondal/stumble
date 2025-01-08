@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stumble - Home</title>
-    <link rel="stylesheet" href= "C:\Users\Apanvi\Desktop\stumble\stumble\static\style.css">
+    <link rel="stylesheet" href= "static/style.css">
 </head>
 <body>
     <div class="side-panel">
@@ -16,8 +16,8 @@
     </div>
     <div class="main-content">
         <div class="user-info">
-            <h1>User Name<span class="age"> | Age: 25</span></h1>
-            <span>⭐ 4.5/5</span>
+            <h1>Welcome, {{ user['full_name'] }}!</h1>
+            <span>⭐ 4.5/5 | Age: 25</span>
         </div>
         <hr>
         <div class="section">
@@ -26,9 +26,9 @@
                 <a href="#">+</a>
             </div>
             <div class="bubbles" id="strengths">
-                <div class="bubble">Math</div>
-                <div class="bubble">Physics</div>
-                <div class="bubble">Programming</div>
+                {% for strength in user['strengths'].split(',') %}
+                    <div class="bubble">{{ strength }}</div>
+                {% endfor %}
             </div>
         </div>
         <div class="section">
@@ -37,8 +37,9 @@
                 <a href="#">+</a>
             </div>
             <div class="bubbles" id="weaknesses">
-                <div class="bubble">Time Management</div>
-                <div class="bubble">Writing Skills</div>
+                {% for weakness in user['weaknesses'].split(',') %}
+                    <div class="bubble">{{ weakness }}</div>
+                {% endfor %}
             </div>
         </div>
     </div>

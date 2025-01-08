@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'Slackey';
-    src: url('C:/Users/Apanvi/Desktop/stumble/stumble/static/Slackey-Regular.ttf') format('truetype');
+    src: url('Slackey-Regular.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'Numans';
-    src: url("C:/Users/Apanvi/Desktop/stumble/stumble/static/DarkerGrotesque-Regular.ttf") format('truetype');
+    src: url("DarkerGrotesque-Regular.ttf") format('truetype');
 }
 
 

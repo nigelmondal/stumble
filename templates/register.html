@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register Form</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(90deg, #1E1E2F, #1C1C3C);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: linear-gradient(90deg, #212A6D, #151B54);
+            width: 500px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.6);
+            padding: 40px 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: #6D8BFF;
+            pointer-events: none;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            background: none;
+            border: 2px solid #2F365F;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            appearance: none;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #ccc;
+            font-family: 'Raleway', sans-serif;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6D8BFF;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 15px 20px;
+            color: #fff;
+            background: #6D8BFF;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .custom-file-upload:hover {
+            background: #5673D0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 15px 20px;
+            background: #6D8BFF;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background: #5673D0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 20px 30px;
+            }
+        }
+
+        .form-group select {
+            appearance: none;
+            background: none;
+            color: #fff;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #2F365F;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: normal;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: #212A6D;
+            color: #fff;
+            font-weight: normal;
+        }
+
+        .form-group select option[disabled] {
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/static/images/logo.jpg" alt="Logo">
+            <h2>Register Now</h2>
+        </div>
+        <form class="form" method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <i class="fas fa-user-circle"></i>
+                <input type="text" name="name" placeholder="Full Name" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-venus-mars"></i>
+                <select name="gender" required>
+                    <option value="" disabled selected style="color: #ccc;">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-info-circle"></i>
+                <textarea name="biography" placeholder="Write a short biography"></textarea>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-paint-brush"></i>
+                <input type="text" name="strengths" placeholder="Strengths (e.g., English, Stats)">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-film"></i>
+                <input type="text" name="weaknesses" placeholder="weaknesses (e.g., Math, Coding)">
+            </div>
+            <button type="submit" class="submit-button">Register Now</button>
+        </form>
+    </div>
+</body>
+
+</html>
