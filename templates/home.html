@@ -4,97 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stumble - Home</title>
-    <style>
-        body {
-            display: flex;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        /* Side panel styling */
-        .side-panel {
-            background-color: #228B22;
-            color: white;
-            width: 200px;
-            padding: 20px;
-            height: 100vh;
-        }
-        .side-panel h2 {
-            margin-top: 0;
-            font-size: 24px;
-        }
-        .side-panel a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        .side-panel a:hover {
-            text-decoration: underline;
-        }
-        /* Main content styling */
-        .main-content {
-            background-color: #F5F5DC;
-            padding: 20px;
-            flex-grow: 1;
-        }
-        .main-content h1 {
-            font-size: 32px;
-            margin: 0;
-        }
-        .main-content .user-info {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .main-content .user-info span {
-            font-size: 18px;
-        }
-        .main-content hr {
-            border: 1px solid #ccc;
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            font-size: 24px;
-        }
-        .section-header a {
-            color: #228B22;
-            text-decoration: none;
-            font-size: 28px;
-        }
-        .section-header a:hover {
-            text-decoration: underline;
-        }
-        .bubbles {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .bubble {
-            background-color: #DCDCDC;
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            display: inline-block;
-        }
-    </style>
+    <link rel="stylesheet" href= "C:\Users\Apanvi\Desktop\stumble\stumble\static\style.css">
 </head>
 <body>
     <div class="side-panel">
-        <h2>User Name</h2>
+        <center><h1>STUMBLE</h1></center>
         <a href="#">🔍 For You</a>
         <a href="#">🔗 Your Buddies</a>
         <a href="#">📅 Calendar</a>
+        <a href = "#"">Profile</a>
     </div>
     <div class="main-content">
         <div class="user-info">
-            <h1>User Name</h1>
-            <span>⭐ 4.5/5 | Age: 25</span>
+            <h1>User Name<span class="age"> | Age: 25</span></h1>
+            <span>⭐ 4.5/5</span>
         </div>
         <hr>
         <div class="section">
@@ -102,7 +25,7 @@
                 <span>My Strengths</span>
                 <a href="#">+</a>
             </div>
-            <div class="bubbles">
+            <div class="bubbles" id="strengths">
                 <div class="bubble">Math</div>
                 <div class="bubble">Physics</div>
                 <div class="bubble">Programming</div>
@@ -113,7 +36,7 @@
                 <span>My Weaknesses</span>
                 <a href="#">+</a>
             </div>
-            <div class="bubbles">
+            <div class="bubbles" id="weaknesses">
                 <div class="bubble">Time Management</div>
                 <div class="bubble">Writing Skills</div>
             </div>
