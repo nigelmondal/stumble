@@ -11,7 +11,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_PASSWORD'] = 'AppleC30'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
