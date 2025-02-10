@@ -21,7 +21,7 @@ bcrypt = Bcrypt(app)
 #######################################################################
 # ROUTES
 #######################################################################
- 
+
 @app.route('/')
 def root():
     """Redirect to home or login depending on session."""
@@ -162,6 +162,19 @@ def add_weakness():
 
     return redirect(url_for('home'))
 
+@app.route('/foryou')
+def foryou():
+    return render_template('foryou.html')
+
+# Route for 'Chat' Page
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
+# Route for 'Calendar' Page
+@app.route('/calendar')
+def calendar():
+    return render_template('calendar.html')
 
 
 #######################################################################

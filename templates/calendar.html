@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stumble - Calendar</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='/calendar_style.css') }}">
+
+</head>
+
+<body>
+
+    <!-- Side Panel -->
+
+    <div class="side-panel">
+
+        <h1>STUMBLE</h1>
+
+        <a href="home.html">🔍 For You</a>
+
+        <a href="#">🔗 Your Buddies</a>
+
+        <a href="calendar.html">📅 Calendar</a>
+
+    </div>
+
+
+
+    <!-- Main Content -->
+
+    <div class="main-content">
+
+        <h1>📅 Calendar</h1>
+
+        <hr>
+
+        <div id="calendar">
+
+            <div class="calendar-header">
+
+                <button id="prevMonth">❮</button>
+
+                <h2 id="currentMonth"></h2>
+
+                <button id="nextMonth">❯</button>
+
+            </div>
+
+            <div class="calendar-container">
+
+                <div class="calendar-grid" id="calendarGrid">
+
+                    <!-- Days and appointments will be dynamically generated -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Appointment Modal -->
+
+        <div id="appointmentModal" class="modal">
+
+            <div class="modal-content">
+
+                <span class="close" id="closeModal">&times;</span>
+
+                <h2>Schedule Session</h2>
+
+                <form id="appointmentForm">
+
+                    <label for="appointmentDate">Date:</label>
+
+                    <input type="text" id="appointmentDate" readonly>
+
+                    
+
+                    <label for="stumbleBuddy">Stumble Buddy:</label>
+
+                    <select id="stumbleBuddy" required>
+
+                        <option value="John" style="color: #FF6347;">John</option>
+
+                        <option value="Emma" style="color: #4682B4;">Emma</option>
+
+                        <option value="Sophia" style="color: #32CD32;">Sophia</option>
+
+                        <option value="Michael" style="color: #FFD700;">Michael</option>
+
+                    </select>
+
+                    
+
+                    <label for="appointmentDescription">Description:</label>
+
+                    <textarea id="appointmentDescription" rows="4" required></textarea>
+
+                    
+
+                    <label for="appointmentTime">Time:</label>
+
+                    <input type="time" id="appointmentTime" required>
+
+                    
+
+                    <button type="submit">Add Appointment</button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- JavaScript -->
+
+    <script>
+
+        const calendarGrid = document.getElementById("calendarGrid");
+
+        const currentMonth = document.getElementById("currentMonth");
+
+        const prevMonthBtn = document.getElementById("prevMonth");
+
+        const nextMonthBtn = document.getElementById("nextMonth");
+
+        const appointmentModal = document.getElementById("appointmentModal");
+
+        const closeModal = document.getElementById("closeModal");
+
+        const appointmentDate = document.getElementById("appointmentDate");
+
+        const appointmentForm = document.getElementById("appointmentForm");
+
+        const stumbleBuddy = document.getElementById("stumbleBuddy");
+
+        const appointmentDescription = document.getElementById("appointmentDescription");
+
+        const appointmentTime = document.getElementById("appointmentTime");
+
+
+
+        let today = new Date();
+
+        let currentYear = today.getFullYear();
+
+        let currentMonthIndex = today.getMonth();
+
+        let appointments = {}; // Store appointments by date
+
+
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+
+
+        function renderCalendar() {
+
+            calendarGrid.innerHTML = "";
+
+            currentMonth.textContent = `${monthNames[currentMonthIndex]} ${currentYear}`;
+
+            const firstDay = new Date(currentYear, currentMonthIndex, 1).getDay();
+
+            const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+
+
+
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            calendarGrid.innerHTML += daysOfWeek.map(day => `<div class="day-header">${day}</div>`).join("");
+
+
+
+            for (let i = 0; i < firstDay; i++) {
+
+                calendarGrid.innerHTML += `<div class="empty"></div>`;
+
+            }
+
+
+
+            for (let day = 1; day <= daysInMonth; day++) {
+
+                const date = `${currentYear}-${currentMonthIndex + 1}-${day}`;
+
+                const appointment = appointments[date];
+
+
+
+                calendarGrid.innerHTML += `
+
+                    <div class="day" data-date="${date}">
+
+                        ${day}
+
+                        ${appointment ? `<span class="buddy" style="background-color: ${appointment.color}" title="${appointment.description}">${appointment.buddy}</span>` : ""}
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            document.querySelectorAll(".day").forEach(day => {
+
+                day.addEventListener("click", (e) => {
+
+                    appointmentDate.value = e.target.dataset.date;
+
+                    appointmentModal.style.display = "flex";
+
+                });
+
+            });
+
+        }
+
+
+
+        prevMonthBtn.addEventListener("click", () => {
+
+            currentMonthIndex--;
+
+            if (currentMonthIndex < 0) {
+
+                currentMonthIndex = 11;
+
+                currentYear--;
+
+            }
+
+            renderCalendar();
+
+        });
+
+
+
+        nextMonthBtn.addEventListener("click", () => {
+
+            currentMonthIndex++;
+
+            if (currentMonthIndex > 11) {
+
+                currentMonthIndex = 0;
+
+                currentYear++;
+
+            }
+
+            renderCalendar();
+
+        });
+
+
+
+        closeModal.addEventListener("click", () => {
+
+            appointmentModal.style.display = "none";
+
+        });
+
+
+
+        appointmentForm.addEventListener("submit", (e) => {
+
+            e.preventDefault();
+
+            const date = appointmentDate.value;
+
+            const buddy = stumbleBuddy.value;
+
+            const description = appointmentDescription.value;
+
+            const time = appointmentTime.value;
+
+
+
+            const colors = {
+
+                "John": "#FF6347",
+
+                "Emma": "#4682B4",
+
+                "Sophia": "#32CD32",
+
+                "Michael": "#FFD700"
+
+            };
+
+
+
+            appointments[date] = { buddy, description, time, color: colors[buddy] };
+
+            appointmentModal.style.display = "none";
+
+            renderCalendar();
+
+        });
+
+
+
+        renderCalendar();
+
+    </script>
+
+</body>
+
+</html>
+

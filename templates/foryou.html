@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stumble - For You Page</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='/foryou_css.css') }}">
+    <script src="{{ url_for('static', filename='/foryou.js') }}"></script>
+
+
+</head>
+
+<body>
+
+    <div class="side-panel">
+
+        <h1>Stumble</h1>
+
+        <a href="#">Home</a>
+
+        <a href="#">Messages</a>
+
+        <a href="#">Profile</a>
+
+        <a href="#">Logout</a>
+
+    </div>
+
+    <div class="main-content">
+
+        <h1 class="center-title">Choose Your Buddy</h1>
+
+        <div class="profiles-container" id="profilesContainer">
+
+            <!-- Profiles will be dynamically rendered here -->
+
+        </div>
+
+        <div class="navigation">
+
+            <button class="nav-button" id="prevButton">❮</button>
+
+            <button class="nav-button" id="nextButton">❯</button>
+
+        </div>
+
+        <div class="action-buttons">
+
+            <button class="like-button" id="likeButton">♡ Like</button>
+
+            <button class="dislike-button" id="dislikeButton">⊘ Dislike</button>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="profile-popup" id="profilePopup">
+
+        <div class="popup-content">
+
+            <span class="close" id="closePopup">&times;</span>
+
+            <h2 id="popupName"></h2>
+
+            <p><strong>Bio:</strong> <span id="popupBio"></span></p>
+
+            <h3>Strengths:</h3>
+
+            <p id="popupStrengths"></p>
+
+            <h3>Weaknesses:</h3>
+
+            <p id="popupWeaknesses"></p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="notification" id="notification"></div>
+
+</body>
+
+</html>
+
