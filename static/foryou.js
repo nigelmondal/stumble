@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function fetchProfiles() {
-        fetch("/foryou")
+        fetch("/api/foryou")  // Fetch from API, not the HTML page
             .then(response => response.json())
             .then(data => {
                 if (data.error) {

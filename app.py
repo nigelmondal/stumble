@@ -212,9 +212,59 @@ def get_recommendations():
     profiles = sorted(profiles, key=lambda x: (x["match_score"], x["collab_count"]), reverse=True)[:3]
 
     print(profiles)
-    print(jsonify(profiles))
+    return jsonify(profiles)
+
+@app.route("/api/foryou")
+def api_foryou():
+    """Fetch top 3 recommended profiles based on user strengths and weaknesses from the database."""
+    if "user_id" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user_id"]
+
+    # Fetch the current user's strengths and weaknesses
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT strengths, weaknesses FROM user WHERE user_id = %s", (user_id,))
+    user_data = cur.fetchone()
+    
+    if not user_data:
+        return jsonify([])  # No user data found
+
+    user_strengths = user_data['strengths'].split(",") if user_data['strengths'] else []
+    user_weaknesses = user_data['weaknesses'].split(",") if user_data['weaknesses'] else []
+
+    # Fetch other users
+    query = """
+        SELECT user_id, full_name, age, bio, strengths, weaknesses, collab_count 
+        FROM user 
+        WHERE user_id != %s
+    """
+    cur.execute(query, (user_id,))
+    all_profiles = cur.fetchall()
+    
+    cur.close()
+
+    # Calculate match score and sort profiles
+    profiles = []
+    for profile in all_profiles:
+        profile_strengths = profile['strengths'].split(",") if profile['strengths'] else []
+        profile_weaknesses = profile['weaknesses'].split(",") if profile['weaknesses'] else []
+        match_score = len(set(user_strengths) & set(profile_strengths)) + len(set(user_weaknesses) & set(profile_weaknesses))
+        
+        profiles.append({
+            "id": profile['user_id'],
+            "name": profile['full_name'],
+            "age": profile['age'],
+            "bio": profile['bio'],
+            "match_score": match_score,
+            "collab_count": profile['collab_count']
+        })
+    
+    # Sort by highest match score, then by collaboration count, and take top 3
+    profiles = sorted(profiles, key=lambda x: (x["match_score"], x["collab_count"]), reverse=True)[:3]
 
     return jsonify(profiles)
+
 
 
 @app.route("/foryou")
