@@ -10,6 +10,7 @@
 
     <title>Stumble - For You Page</title>
 
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='/foryou_css.css') }}">
     <script src="{{ url_for('static', filename='/foryou.js') }}"></script>
 
@@ -19,7 +20,7 @@
 <body>
 
     <div class="side-panel">
-        <h1>Stumble</h1>
+        <a href = "home""><center><h1>STUMBLE</h1></center></a>
         <a href="foryou">🔍 For You</a>
         <a href="chat">🔗 Your Buddies</a>
         <a href="calendar">📅 Calendar</a>
