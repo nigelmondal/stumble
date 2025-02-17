@@ -1,324 +1,225 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Stumble - Calendar</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='/calendar_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='calendar_style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
-
 </head>
-
 <body>
 
     <!-- Side Panel -->
-
     <div class="side-panel">
-
-        <a href = "home""><center><h1>STUMBLE</h1></center></a>
-
-        <a href="foryou">🔍 For You</a>
-        <a href="chat">🔗 Your Buddies</a>
-        <a href="calendar">📅 Calendar</a>
-        <a href = "home"">Profile</a>
-
+        <a href="{{ url_for('home') }}"><center><h1>STUMBLE</h1></center></a>
+        <a href="{{ url_for('foryou_page') }}">🔍 For You</a>
+        <a href="{{ url_for('chat') }}">🔗 Your Buddies</a>
+        <a href="{{ url_for('calendar') }}">📅 Calendar</a>
+        <a href="{{ url_for('home') }}">Profile</a>
     </div>
-
-
 
     <!-- Main Content -->
-
     <div class="main-content">
-
         <h1>📅 Calendar</h1>
-
         <hr>
-
         <div id="calendar">
-
             <div class="calendar-header">
-
                 <button id="prevMonth">❮</button>
-
                 <h2 id="currentMonth"></h2>
-
                 <button id="nextMonth">❯</button>
-
             </div>
-
             <div class="calendar-container">
-
                 <div class="calendar-grid" id="calendarGrid">
-
                     <!-- Days and appointments will be dynamically generated -->
-
                 </div>
-
             </div>
-
         </div>
-
-
 
         <!-- Appointment Modal -->
-
-        <div id="appointmentModal" class="modal">
-
+        <div id="appointmentModal" class="modal" style="display: none;">
             <div class="modal-content">
-
                 <span class="close" id="closeModal">&times;</span>
-
                 <h2>Schedule Session</h2>
-
                 <form id="appointmentForm">
-
                     <label for="appointmentDate">Date:</label>
-
-                    <input type="text" id="appointmentDate" readonly>
-
-                    
+                    <input type="date" id="appointmentDate" required>
 
                     <label for="stumbleBuddy">Stumble Buddy:</label>
-
                     <select id="stumbleBuddy" required>
-
-                        <option value="John" style="color: #FF6347;">John</option>
-
-                        <option value="Emma" style="color: #4682B4;">Emma</option>
-
-                        <option value="Sophia" style="color: #32CD32;">Sophia</option>
-
-                        <option value="Michael" style="color: #FFD700;">Michael</option>
-
+                        {% for buddy in buddies %}
+                            <option value="{{ buddy.user_id }}">{{ buddy.full_name }}</option>
+                        {% endfor %}
                     </select>
 
-                    
-
                     <label for="appointmentDescription">Description:</label>
-
                     <textarea id="appointmentDescription" rows="4" required></textarea>
 
-                    
-
                     <label for="appointmentTime">Time:</label>
-
                     <input type="time" id="appointmentTime" required>
 
-                    
-
                     <button type="submit">Add Appointment</button>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
 
-
-
     <!-- JavaScript -->
-
     <script>
-
         const calendarGrid = document.getElementById("calendarGrid");
-
-        const currentMonth = document.getElementById("currentMonth");
-
+        const currentMonthEl = document.getElementById("currentMonth");
         const prevMonthBtn = document.getElementById("prevMonth");
-
         const nextMonthBtn = document.getElementById("nextMonth");
 
         const appointmentModal = document.getElementById("appointmentModal");
-
-        const closeModal = document.getElementById("closeModal");
-
-        const appointmentDate = document.getElementById("appointmentDate");
-
+        const closeModalBtn = document.getElementById("closeModal");
         const appointmentForm = document.getElementById("appointmentForm");
 
-        const stumbleBuddy = document.getElementById("stumbleBuddy");
-
-        const appointmentDescription = document.getElementById("appointmentDescription");
-
-        const appointmentTime = document.getElementById("appointmentTime");
-
-
-
         let today = new Date();
-
         let currentYear = today.getFullYear();
-
         let currentMonthIndex = today.getMonth();
 
-        let appointments = {}; // Store appointments by date
-
-
-
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-
-
         function renderCalendar() {
+    calendarGrid.innerHTML = "";
 
-            calendarGrid.innerHTML = "";
+    let monthName = new Date(currentYear, currentMonthIndex).toLocaleString('default', {
+        month: 'long', year: 'numeric'
+    });
+    currentMonthEl.textContent = monthName;
 
-            currentMonth.textContent = `${monthNames[currentMonthIndex]} ${currentYear}`;
+    const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
 
-            const firstDay = new Date(currentYear, currentMonthIndex, 1).getDay();
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        let emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty';
+        calendarGrid.appendChild(emptyDiv);
+    }
 
-            const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
-
-
-
-            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-            calendarGrid.innerHTML += daysOfWeek.map(day => `<div class="day-header">${day}</div>`).join("");
-
-
-
-            for (let i = 0; i < firstDay; i++) {
-
-                calendarGrid.innerHTML += `<div class="empty"></div>`;
-
-            }
-
-
-
+    fetch(`/get_meetings?year=${currentYear}&month=${currentMonthIndex + 1}`)
+        .then(response => response.json())
+        .then(data => {
             for (let day = 1; day <= daysInMonth; day++) {
+                let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                const date = `${currentYear}-${currentMonthIndex + 1}-${day}`;
+                let dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.dataset.date = dateStr;
+                dayDiv.innerHTML = `<strong>${day}</strong>`;
 
-                const appointment = appointments[date];
+                if (data[dateStr]) {
+                    let meetingsForDay = data[dateStr];
 
+                    meetingsForDay.forEach((mtg, index) => {
+                        let meetingDiv = document.createElement('div');
+                        meetingDiv.className = 'meeting';
 
+                        // 🌈 Generate a unique color per meeting (cycle through a predefined list)
+                        let colors = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#8A2BE2", "#FF4500"];
+                        let meetingColor = colors[index % colors.length]; // Rotate colors
 
-                calendarGrid.innerHTML += `
+                        meetingDiv.style.backgroundColor = meetingColor;
+                        meetingDiv.style.color = "white"; // Text color for contrast
+                        meetingDiv.style.padding = "5px";
+                        meetingDiv.style.borderRadius = "5px";
+                        meetingDiv.style.marginTop = "5px";
+                        meetingDiv.style.fontSize = "14px";
 
-                    <div class="day" data-date="${date}">
+                        meetingDiv.innerHTML = `<strong>${mtg.buddy}</strong> @ ${mtg.time}`;
 
-                        ${day}
+                        let deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = "❌";
+                        deleteBtn.style.marginLeft = "5px";
+                        deleteBtn.style.border = "none";
+                        deleteBtn.style.background = "transparent";
+                        deleteBtn.style.cursor = "pointer";
+                        deleteBtn.style.color = "white";
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteMeeting(mtg.meeting_id);
+                        };
 
-                        ${appointment ? `<span class="buddy" style="background-color: ${appointment.color}" title="${appointment.description}">${appointment.buddy}</span>` : ""}
+                        meetingDiv.appendChild(deleteBtn);
+                        dayDiv.appendChild(meetingDiv);
+                    });
+                }
 
-                    </div>
-
-                `;
-
-            }
-
-
-
-            document.querySelectorAll(".day").forEach(day => {
-
-                day.addEventListener("click", (e) => {
-
-                    appointmentDate.value = e.target.dataset.date;
-
-                    appointmentModal.style.display = "flex";
-
+                dayDiv.addEventListener('click', () => {
+                    document.getElementById("appointmentDate").value = dateStr;
+                    appointmentModal.style.display = "block";
                 });
 
-            });
+                calendarGrid.appendChild(dayDiv);
+            }
+        })
+        .catch(err => console.error("Error loading meetings:", err));
+}
 
+        function deleteMeeting(meetingId) {
+            fetch("/delete_meeting", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ meeting_id: meetingId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    renderCalendar();
+                } else {
+                    alert("Error deleting the meeting: " + JSON.stringify(data));
+                }
+            })
+            .catch(err => console.error("Delete error:", err));
         }
 
-
-
         prevMonthBtn.addEventListener("click", () => {
-
             currentMonthIndex--;
-
             if (currentMonthIndex < 0) {
-
                 currentMonthIndex = 11;
-
                 currentYear--;
-
             }
-
             renderCalendar();
-
         });
-
-
 
         nextMonthBtn.addEventListener("click", () => {
-
             currentMonthIndex++;
-
             if (currentMonthIndex > 11) {
-
                 currentMonthIndex = 0;
-
                 currentYear++;
-
             }
-
             renderCalendar();
-
         });
 
-
-
-        closeModal.addEventListener("click", () => {
-
+        closeModalBtn.addEventListener("click", () => {
             appointmentModal.style.display = "none";
-
         });
-
-
 
         appointmentForm.addEventListener("submit", (e) => {
-
             e.preventDefault();
 
-            const date = appointmentDate.value;
+            let date = document.getElementById("appointmentDate").value;
+            let buddy_id = document.getElementById("stumbleBuddy").value;
+            let description = document.getElementById("appointmentDescription").value;
+            let time = document.getElementById("appointmentTime").value;
 
-            const buddy = stumbleBuddy.value;
-
-            const description = appointmentDescription.value;
-
-            const time = appointmentTime.value;
-
-
-
-            const colors = {
-
-                "John": "#FF6347",
-
-                "Emma": "#4682B4",
-
-                "Sophia": "#32CD32",
-
-                "Michael": "#FFD700"
-
-            };
-
-
-
-            appointments[date] = { buddy, description, time, color: colors[buddy] };
-
-            appointmentModal.style.display = "none";
-
-            renderCalendar();
-
+            fetch("/add_meeting", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ date, buddy_id, description, time })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    appointmentModal.style.display = "none";
+                    renderCalendar();
+                } else {
+                    alert("Error adding meeting: " + JSON.stringify(data));
+                }
+            })
+            .catch(err => console.error("Error scheduling meeting:", err));
         });
 
-
-
         renderCalendar();
-
     </script>
 
 </body>
-
 </html>
-

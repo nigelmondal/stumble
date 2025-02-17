@@ -1,5 +1,6 @@
 from flask import *
 from flask_mysqldb import MySQL
+from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
@@ -266,6 +267,98 @@ def api_foryou():
     return jsonify(profiles)
 
 
+@app.route('/get_meetings')
+def get_meetings():
+    """Return all scheduled meetings for the current user."""
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    try:
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        user_id = session['user_id']
+
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT m.meeting_id, m.meeting_date, m.meeting_time, m.description, 
+                   u.full_name AS buddy_name
+            FROM meetings m
+            JOIN user u ON m.buddy_id = u.user_id
+            WHERE YEAR(m.meeting_date) = %s AND MONTH(m.meeting_date) = %s AND m.user_id = %s
+            ORDER BY m.meeting_date, m.meeting_time
+        """, (year, month, user_id))
+
+        meetings = cur.fetchall()
+        cur.close()
+
+        meetings_dict = {}
+        for meeting in meetings:
+            date_key = meeting["meeting_date"].strftime("%Y-%m-%d")
+
+            # ✅ FIX: Convert timedelta to string if necessary
+            meeting_time = meeting["meeting_time"]
+            if isinstance(meeting_time, timedelta):
+                meeting_time = (datetime.min + meeting_time).time().strftime("%H:%M")
+            else:
+                meeting_time = meeting_time.strftime("%H:%M")
+
+            if date_key not in meetings_dict:
+                meetings_dict[date_key] = []
+
+            meetings_dict[date_key].append({
+                "meeting_id": meeting["meeting_id"],
+                "buddy": meeting["buddy_name"],
+                "time": meeting_time,
+                "description": meeting["description"]
+            })
+
+        return jsonify(meetings_dict)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Return JSON on errors
+
+
+@app.route('/add_meeting', methods=['POST'])
+def add_meeting():
+    """Insert a new meeting into the database."""
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.json
+    user_id = session['user_id']
+    buddy_id = data["buddy_id"]
+    meeting_date = data["date"]
+    meeting_time = data["time"]
+    description = data["description"]
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        INSERT INTO meetings (user_id, buddy_id, meeting_date, meeting_time, description)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (user_id, buddy_id, meeting_date, meeting_time, description))
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+@app.route('/delete_meeting', methods=['POST'])
+def delete_meeting():
+    """Delete a scheduled meeting."""
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.json
+    meeting_id = data["meeting_id"]
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM meetings WHERE meeting_id = %s AND user_id = %s", (meeting_id, user_id))
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({"status": "success"})
+
+
 
 @app.route("/foryou")
 def foryou_page():
@@ -279,7 +372,18 @@ def chat():
 # Route for 'Calendar' Page
 @app.route('/calendar')
 def calendar():
-    return render_template('calendar.html')
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT user_id, full_name FROM user WHERE user_id != %s", (user_id,))
+    buddies = cur.fetchall()
+    cur.close()
+
+    return render_template("calendar.html", buddies=buddies)
+
 
 
 #######################################################################

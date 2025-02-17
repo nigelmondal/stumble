@@ -10,7 +10,7 @@ CREATE TABLE user (
     password VARCHAR(255) NOT NULL,
     gender VARCHAR(6),
     age INT,
-    bio TEXT,
+    bio TEXT,	
     strengths TEXT,
     weaknesses TEXT,
     collab_count INT DEFAULT 0,
