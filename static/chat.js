@@ -5,7 +5,7 @@ const chatHistory = {
         { text: "Hello, how are you?", type: "sent" },
         { text: "I'm good! What about you?", type: "received" },
     ],
-    Niger: [
+    Niger: [ 
         { text: "Hey Niger!", type: "sent" },
         { text: "Hi, long time no see!", type: "received" },
     ],

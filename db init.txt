@@ -16,3 +16,30 @@ CREATE TABLE user (
     collab_count INT DEFAULT 0,
     PRIMARY KEY (user_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS meetings (
+    meeting_id INT AUTO_INCREMENT NOT NULL,
+    user_id INT NOT NULL,
+    buddy_id INT NOT NULL,
+    meeting_date DATE NOT NULL,
+    meeting_time TIME NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (meeting_id),
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (buddy_id) REFERENCES user(user_id) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE IF NOT EXISTS chats (
+    chat_id INT AUTO_INCREMENT NOT NULL,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (chat_id),
+    FOREIGN KEY (sender_id) REFERENCES user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES user(user_id) ON DELETE CASCADE
+);

@@ -2,6 +2,7 @@ from flask import *
 from flask_mysqldb import MySQL
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
+import MySQLdb.cursors
 
 app = Flask(__name__)
 
@@ -368,6 +369,48 @@ def foryou_page():
 @app.route('/chat')
 def chat():
     return render_template('chat.html')
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    data = request.json
+    sender_id = session['user_id']
+    receiver_id = data.get('receiver_id')
+    message = data.get('message')
+
+    if not receiver_id or not message:
+        return jsonify({'error': 'Receiver ID and message are required'}), 400
+
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("INSERT INTO chats (sender_id, receiver_id, message) VALUES (%s, %s, %s)", 
+                       (sender_id, receiver_id, message))
+        mysql.connection.commit()
+        cursor.close()
+        return jsonify({'success': 'Message sent successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/get_messages/<int:receiver_id>', methods=['GET'])
+def get_messages(receiver_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    sender_id = session['user_id']
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        "SELECT sender_id, receiver_id, message, sent_at FROM chats "
+        "WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s) "
+        "ORDER BY sent_at ASC",
+        (sender_id, receiver_id, receiver_id, sender_id)
+    )
+    messages = cursor.fetchall()
+    cursor.close()
+    return jsonify(messages)
+
 
 # Route for 'Calendar' Page
 @app.route('/calendar')
