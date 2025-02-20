@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 import MySQLdb.cursors
+from psutil import users
 
 app = Flask(__name__)
 
@@ -13,7 +14,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_PASSWORD'] = 'cs6191$a'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
@@ -162,6 +163,15 @@ def add_weakness():
         mysql.connection.commit()
     cur.close()
 
+    return redirect(url_for('home'))
+
+@app.route('/update_bio', methods=['POST'])
+def update_bio():
+    new_bio = request.form['bio']
+
+    # Update the user's bio in the database
+    users['bio'] = new_bio
+    mysql.session.commit()
     return redirect(url_for('home'))
 
 @app.route("/get_recommendations")

@@ -62,43 +62,81 @@
     
 </head>
 <body>
-    <div class="side-panel">
-        <a href = "home""><center><h1>STUMBLE</h1></center></a>
-        <a href="foryou">🔍 For You</a>
-        <a href="chat">🔗 Your Buddies</a>
-        <a href="calendar">📅 Calendar</a>
-        <a href = "home"">Profile</a>
+    <div class="side-panel" id="sidebar">
+        <br><br>
+        <center><h1>stumbl</h1></center>
+        <a href="foryou">for you</a>
+        <a href="chat">your buddies</a>
+        <a href="calendar">calendar</a>
+        <a href="home">profile</a><br><br><br><br><br><br><br>
+        
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        
+                <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
+            
     </div>
+    
     <div class="main-content">
         <div class="user-info">
-            <h1>Welcome, {{ user['full_name'] }}!</h1>
+            <h1>welcome, {{ user['full_name'] }}!</h1>
             <span>⭐ 4.5/5 | Age: 25</span>
-            <a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a>
+            
         </div>
         <hr>
-        <div class="section">
-            <div class="section-header">
-                <span>My Strengths</span>
-                <a href="#" onclick="openModal('strengthModal')">+</a>
+        
+    <!-- New Wrapper for Two-Column Layout -->
+    <div class="content-wrapper">
+        <!-- Left Section -->
+        <div class="left-section">
+            <div class="section">
+                <div class="section-header">
+                    <span>strenghts</span>
+                    <a href="#" onclick="openModal('strengthModal')">+</a>
+                </div>
+                <div class="bubbles" id="strengths">
+                    {% for strength in user['strengths'].split(',') %}
+                        <div class="bubble">{{ strength }}</div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="bubbles" id="strengths">
-                {% for strength in user['strengths'].split(',') %}
-                    <div class="bubble">{{ strength }}</div>
-                {% endfor %}
+            <div class="section">
+                <div class="section-header">
+                    <span>stumbles</span>
+                    <a href="#" onclick="openModal('weaknessModal')"> + </a>
+                </div>
+                <div class="bubbles" id="weaknesses">
+                    {% for weakness in user['weaknesses'].split(',') %}
+                        <div class="bubble">{{ weakness }}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-        <div class="section">
-            <div class="section-header">
-                <span>My Weaknesses</span>
-                <a href="#" onclick="openModal('weaknessModal')">+</a>
+
+        <!-- Right Section (New Section) -->
+        <div class="right-section">
+            <h2>about you</h2>
+            <p>{{ user['bio'] }}</p><BR>
+
+            <hr><BR><bR>
+
+            <H3>teaching style</h3>
+            <div class = "bubbles">
+                <div class = "bubble1">problem-based</div>
+                <div class = "bubble1">demonstration</div>
             </div>
-            <div class="bubbles" id="weaknesses">
-                {% for weakness in user['weaknesses'].split(',') %}
-                    <div class="bubble">{{ weakness }}</div>
-                {% endfor %}
-            </div>
+
+            <H3>learning style</h3>
+            
+                <div class = "bubbles">
+                    <div class = "bubble1">visual</div>
+                    <div class = "bubble1">social</div>
+                    <div class = "bubble1">auditory</div>
+                </div>    
         </div>
+
+        
     </div>
+</div>
 
     <div id="strengthModal" class="modal">
         <div class="modal-content">
@@ -142,6 +180,7 @@
                 weaknessModal.style.display = 'none';
             }
         }
+       
     </script>
 </body>
 </html>

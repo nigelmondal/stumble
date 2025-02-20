@@ -10,17 +10,18 @@
 <body>
 
     <!-- Side Panel -->
-    <div class="side-panel">
-        <a href="{{ url_for('home') }}"><center><h1>STUMBLE</h1></center></a>
-        <a href="{{ url_for('foryou_page') }}">🔍 For You</a>
-        <a href="{{ url_for('chat') }}">🔗 Your Buddies</a>
-        <a href="{{ url_for('calendar') }}">📅 Calendar</a>
-        <a href="{{ url_for('home') }}">Profile</a>
+    <div class="side-panel" id = "sidebar">
+        <br><br>
+        <center><h1>stumbl</h1></center>
+        <a href="foryou">for you</a>
+        <a href="chat">your buddies</a>
+        <a href="calendar">calendar</a>
+        <a href="home">profile</a>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <h1>📅 Calendar</h1>
+        <h1>calendar</h1>
         <hr>
         <div id="calendar">
             <div class="calendar-header">
@@ -78,8 +79,10 @@
         let currentYear = today.getFullYear();
         let currentMonthIndex = today.getMonth();
 
-        function renderCalendar() {
-    calendarGrid.innerHTML = "";
+
+
+function renderCalendar() {
+    calendarGrid.innerHTML = ""; // Clear previous content
 
     let monthName = new Date(currentYear, currentMonthIndex).toLocaleString('default', {
         month: 'long', year: 'numeric'
@@ -89,36 +92,54 @@
     const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
 
+    // 🟢 STEP 1: Add days of the week directly to `calendarGrid`
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    daysOfWeek.forEach(day => {
+        let dayDiv = document.createElement("div");
+        dayDiv.className = "day-header";  // Make sure this class is styled properly in CSS
+        dayDiv.textContent = day;
+        calendarGrid.appendChild(dayDiv);
+    });
+
+    // 🟢 STEP 2: Add empty divs for alignment
     for (let i = 0; i < firstDayOfMonth; i++) {
-        let emptyDiv = document.createElement('div');
-        emptyDiv.className = 'empty';
+        let emptyDiv = document.createElement("div");
+        emptyDiv.className = "empty";
         calendarGrid.appendChild(emptyDiv);
     }
 
+    // 🟢 STEP 3: Add the actual date numbers
     fetch(`/get_meetings?year=${currentYear}&month=${currentMonthIndex + 1}`)
         .then(response => response.json())
         .then(data => {
             for (let day = 1; day <= daysInMonth; day++) {
                 let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                let dayDiv = document.createElement('div');
-                dayDiv.className = 'day';
+                let dayDiv = document.createElement("div");
+                dayDiv.className = "day";
                 dayDiv.dataset.date = dateStr;
-                dayDiv.innerHTML = `<strong>${day}</strong>`;
+                let dateLabel = document.createElement('div');
+dateLabel.innerHTML = `<strong>${day}</strong>`;
+dateLabel.className = "date-label";
+
+let meetingsContainer = document.createElement('div'); 
+meetingsContainer.className = "meetings-container"; // Add a new container
+
+dayDiv.appendChild(dateLabel);
+dayDiv.appendChild(meetingsContainer); // Meetings will go inside this
 
                 if (data[dateStr]) {
                     let meetingsForDay = data[dateStr];
 
                     meetingsForDay.forEach((mtg, index) => {
-                        let meetingDiv = document.createElement('div');
-                        meetingDiv.className = 'meeting';
+                        let meetingDiv = document.createElement("div");
+                        meetingDiv.className = "meeting";
 
-                        // 🌈 Generate a unique color per meeting (cycle through a predefined list)
                         let colors = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#8A2BE2", "#FF4500"];
-                        let meetingColor = colors[index % colors.length]; // Rotate colors
+                        let meetingColor = colors[index % colors.length];
 
                         meetingDiv.style.backgroundColor = meetingColor;
-                        meetingDiv.style.color = "white"; // Text color for contrast
+                        meetingDiv.style.color = "white";
                         meetingDiv.style.padding = "5px";
                         meetingDiv.style.borderRadius = "5px";
                         meetingDiv.style.marginTop = "5px";
@@ -126,7 +147,7 @@
 
                         meetingDiv.innerHTML = `<strong>${mtg.buddy}</strong> @ ${mtg.time}`;
 
-                        let deleteBtn = document.createElement('button');
+                        let deleteBtn = document.createElement("button");
                         deleteBtn.textContent = "❌";
                         deleteBtn.style.marginLeft = "5px";
                         deleteBtn.style.border = "none";
@@ -139,11 +160,11 @@
                         };
 
                         meetingDiv.appendChild(deleteBtn);
-                        dayDiv.appendChild(meetingDiv);
+                        meetingsContainer.appendChild(meetingDiv);
                     });
                 }
 
-                dayDiv.addEventListener('click', () => {
+                dayDiv.addEventListener("click", () => {
                     document.getElementById("appointmentDate").value = dateStr;
                     appointmentModal.style.display = "block";
                 });
@@ -154,7 +175,9 @@
         .catch(err => console.error("Error loading meetings:", err));
 }
 
-        function deleteMeeting(meetingId) {
+
+
+function deleteMeeting(meetingId) {
             fetch("/delete_meeting", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

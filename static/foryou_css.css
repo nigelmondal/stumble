@@ -3,67 +3,98 @@
     src: url('Slackey-Regular.ttf') format('truetype');
 }
 
-
-
 @font-face {
     font-family: 'Numans';
-    src: url("DarkerGrotesque-Regular.ttf") format('truetype');
+    src: url("SpecialElite-Regular.ttf") format('truetype');
+}
+
+@keyframes tilt {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-5deg); }
+    40% { transform: rotate(5deg); }
+    60% { transform: rotate(-10deg); }
+    80% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.side-panel h1:hover {
+    animation: tilt 1.5s ease-in-out;
 }
 
 
-
-body {
+html, body {
     display: flex;
     margin: 0;
     font-family: 'Numans', serif;
+    background-color: #F5F5DC;
     overflow: hidden;
-    background-color: #F5F5DC; /* Background color */
+    height : 100%;
 }
 
-
-
+/* Side panel styling */
 .side-panel {
     background-color: #1f453d;
-    color: white;
-    width: 250px;
-    padding: 30px;
+    color: #F5F5DC;
+    width: 200px;
+    padding: 20px;
     height: 100vh;
+    margin-top: 20;
+    position: fixed;
+    left : 0;
+    top : 0;
+    bottom : 0;
+    overflow: hidden;
 }
 
 
 
 .side-panel h1 {
-    font-size: 50px;
+    margin-top: 0;
+    font-size: 48px;
     font-family: 'Slackey', sans-serif;
-    color: #F5F5DC;
+    color :#F5F5DC
 }
 
 
 
 .side-panel a {
-    color: white;
-    text-decoration: none;
-    font-size: 26px;
-    margin: 15px 0;
     display: block;
+    color: #F5F5DC;
+    text-decoration: none;
+    font-size: 22px;
+    margin: 22px 0;
+    transition: font-size 0.3s ease, padding 0.3s ease;
+    border-radius: 5px;
 }
-
-
 
 .side-panel a:hover {
     text-decoration: underline;
+    font-size: 25px;
+    transform: scale(1.1);
+    transition: transform 0.5s ease;
+    color:#1f453d;
+    background: #F5F5DC;
+    cursor: pointer;
+    margin-bottom: 0;
+    border: none;
 }
 
-
-
 .main-content {
-    padding: 40px;
+    background-color: #F5F5DC;
+    padding: 55px;
     flex-grow: 1;
-    height: 100vh;
+    margin-top: 20px;
+    position : fixed;
+    left : 250px;
+    top : 0;
+    right : 0;
+    bottom : 0;
+    overflow : hidden;
+}
+.content-wrapper {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
+    gap: 20px;
+    margin-top: 20px;
 }
 
 
@@ -131,6 +162,7 @@ body {
     top: 50%;
     transform: translateY(-50%);
     transition: background 0.3s;
+    
 
 }
 
@@ -138,6 +170,7 @@ body {
 
 #prevButton {
     left: 10px;
+    
 }
 
 
@@ -168,14 +201,18 @@ body {
     padding: 10px 20px;
     font-size: 18px;
     cursor: pointer;
-    margin: 0 10px;
+    margin: 0 15px;
     font-family: 'Slackey', sans-serif;
 }
 
 
 
 .like-button:hover, .dislike-button:hover {
-      background-color: #2a6653;
+    background-color: #2a6653;
+    font-size: 20px;
+    transform: scale(1.1);
+    transition: transform 0.5s ease;
+    animation: tilt 1.0s ease-in-out;
 }
 
 
@@ -252,8 +289,34 @@ body {
 }
 
 
+@keyframes rain {
+    from {
+        transform: translateY(-10vh);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
 
+.rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Keeps it behind other content */
+    overflow: hidden;
+    pointer-events: none;
+}
 
-
-
-
+.raindrop {
+    
+    background-color: #2a66536f; /* Green droplet color */
+    position: absolute;
+    
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: rain linear infinite;
+}
