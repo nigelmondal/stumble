@@ -35,29 +35,93 @@ def root():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Register a new user."""
+    """Register a new user with multi-step fields."""
     if request.method == 'POST':
-        full_name = request.form['name']
-        email = request.form['email']
-        password_plain = request.form['password']
-        gender = request.form['gender']
-        bio = request.form.get('biography', '')
+        # Slab 1: Basic info
+        full_name = request.form.get('full_name') or request.form.get('name')  # Match your HTML input name/id
+        email = request.form.get('email')
+        password_plain = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Slab 2: Personal details
+        gender = request.form.get('gender')
+        dob_str = request.form.get('dob')
+        occupation = request.form.get('occupation')
+        other_occupation = request.form.get('other_occupation')
+        education = request.form.get('education')
+        other_education = request.form.get('other_education')
+
+        # Slab 3: Skills & preferences
         strengths = request.form.get('strengths', '')
         weaknesses = request.form.get('weaknesses', '')
+        bio = request.form.get('bio', '')
+        learning_style = request.form.get('learning-style')
+        other_learning = request.form.get('other-learning')
+        teaching_style = request.form.get('teaching-style')
+        other_teaching = request.form.get('other-teaching')
 
-        # Hash the password using bcrypt
+        # 1) Validate passwords match
+        if password_plain != confirm_password:
+            flash('Passwords do not match. Please try again.', 'danger')
+            return redirect(url_for('register'))
+
+        # 2) Handle "Other" occupation
+        if occupation == 'Other' and other_occupation:
+            occupation = other_occupation
+
+        # 3) Handle "Other" education
+        if education == 'Other' and other_education:
+            education = other_education
+
+        # 4) Handle "Other" learning style
+        if learning_style == 'Other' and other_learning:
+            learning_style = other_learning
+
+        # 5) Handle "Other" teaching style
+        if teaching_style == 'Other' and other_teaching:
+            teaching_style = other_teaching
+
+        # 6) Convert date_of_birth if provided
+        date_of_birth = None
+        if dob_str:
+            from datetime import datetime
+            try:
+                date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Invalid date format. Please use YYYY-MM-DD.', 'danger')
+                return redirect(url_for('register'))
+
+        # 7) Hash the password
         password_hashed = bcrypt.generate_password_hash(password_plain).decode('utf-8')
 
-        # Insert into database
+        # 8) Insert into database
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
-                INSERT INTO user (full_name, email, password, gender, bio, strengths, weaknesses)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (full_name, email, password_hashed, gender, bio, strengths, weaknesses))
+                INSERT INTO user (
+                    full_name, email, password, gender,
+                    date_of_birth, occupation, highest_education, bio,
+                    strengths, weaknesses, learning_style, teaching_style
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                full_name,
+                email,
+                password_hashed,
+                gender,
+                date_of_birth,
+                occupation,
+                education,
+                bio,
+                strengths,
+                weaknesses,
+                learning_style,
+                teaching_style
+            ))
             mysql.connection.commit()
         except Exception as e:
-            flash('Error: {}'.format(e), 'danger')
+            flash(f'Error: {e}', 'danger')
+            cur.close()
             return redirect(url_for('register'))
         finally:
             cur.close()
@@ -65,6 +129,7 @@ def register():
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
 
+    # If GET request, just render the form template
     return render_template('register.html')
 
 

@@ -3,272 +3,327 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Register Form</title>
-    <!-- Font Awesome for icons -->
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <title>STUMBL Registration</title>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css">
+
+    <!-- Example custom fonts (ensure these files exist or remove the @font-face rules) -->
     <style>
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+        @font-face {
+            font-family: 'Slackey';
+            src: url('Slackey-Regular.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Numans';
+            src: url('DarkerGrotesque-Regular.ttf') format('truetype');
+        }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Raleway, sans-serif;
+            font-family: 'Numans', sans-serif;
         }
 
         body {
-            /* Updated background to shades of #F5F5DC */
             background: linear-gradient(90deg, #064927, #eae8d5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
         .container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200vh;
-        }
-
-        .screen {
-            /* Updated form interior with shades of #1f453d */
-            background: linear-gradient(90deg, #1f453d, #164030);
             position: relative;
-            height: 1000px; /* Adjusted height for more content */
             width: 500px;
-            box-shadow: 0px 0px 24px #000;
+            background: #1f453d;
+            padding: 50px 30px;
             border-radius: 15px;
+            box-shadow: 0 0 24px #000;
+            color: #f5f5dc;
+            text-align: center;
             overflow: hidden;
         }
 
-        .screen__content {
-            z-index: 2;
-            position: relative;
-            height: 100%;
-        }
-
-        .screen__background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index:0;
-            -webkit-clip-path: inset(0 0 0 0);
-            clip-path: inset(0 0 0 0);
-        }
-
-        .screen__background__shape {
-            transform: rotate(45deg);
-            position: absolute;
-        }
-
-        .screen__background__shape1 {
-            height: 520px;
-            width: 520px;
-            background: #d1d1c6; /* Light shade of #F5F5DC */
-            top: -50px;
-            right: 120px;
-            border-radius: 0 72px 0 0;
-        }
-
-        .screen__background__shape2 {
-            height: 220px;
-            width: 220px;
-            background: #f5f5dc; /* Light shade of #F5F5DC */
-            top: -172px;
-            right: 0;
-            border-radius: 32px;
-        }
-
-        .screen__background__shape3 {
-            height: 540px;
-            width: 190px;
-            background: linear-gradient(270deg, #1f453d, #164030);
-            top: -36px;
-            right: 0;
-            border-radius: 32px;
-        }
-
-        .screen__background__shape4 {
-            height: 200px;
-            width: 200px;
-            background: #1f453d;
-            top: 420px;
-            right: 50px;
-            border-radius: 60px;
-        }
-
-        .register {
-            width: 320px;
-            padding: 30px;
-            margin: auto;
-            padding-top: 100px;
-            text-align: center;
-        }
-
-        .register__logo {
-            display: block;
-            margin: 0 auto 30px auto;
-            width: 120px;
-        }
-
-        .register__field {
+        .logo-container {
             display: flex;
-            align-items: center;
-            border-bottom: 2px solid #2F365F;
-            padding: 10px 0;
-            margin: 15px 0;
-        }
-
-        .register__icon {
-            font-size: 18px;
-            color: #1f453d;
-            margin-right: 10px;
-        }
-
-        .register__input {
-            border: none;
-            background: none;
-            font-size: 18px;
-            color: #1f453d;
-            font-weight: 600;
-            flex: 1;
-            padding: 8px 0;
-        }
-
-        .register__input:focus {
-            outline: none;
-        }
-
-        .register__input::placeholder {
-            color: #1f453d;
-        }
-
-        .register__submit {
-            background: #f5f5dc;
-            color: #1f453d;
-            font-size: 16px;
-            margin-top: 30px;
-            padding: 16px 20px;
-            border-radius: 26px;
-            border: none;
-            text-transform: uppercase;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            width: 100px;
+            height: auto;
+        }
+
+        /* Multi-step slabs */
+        .slab {
+            display: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .slab.active {
+            display: block;
+        }
+
+        .field {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
             width: 100%;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .register__submit:hover {
-            background: #dcdcbf; /* Slightly darker shade on hover */
-            color: #164030; /* Darker text on hover */
-        }
-
-        .button__icon {
-            font-size: 20px;
-            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
         }
 
         .error {
             color: red;
-            font-size: 14px;
-            margin-top: 5px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: #f5f5dc;
+            color: #1f453d;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #dcdcbf;
+        }
+
+        /* Back arrow styles */
+        .back-arrow {
+            font-size: 24px;
+            cursor: pointer;
+            color: #f5f5dc;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .back-arrow:hover {
+            transform: translateX(-5px);
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="screen">
-            <div class="screen__content">
-                <form id="registerForm" class="register" method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data">
-                    <h1>STUMBLE</h1>
-                    <br>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-user-circle"></i>
-                        <input type="text" name="name" id="name" class="register__input" placeholder="Full Name" required>
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-envelope"></i>
-                        <input type="email" name="email" id="email" class="register__input" placeholder="Email" required>
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-lock"></i>
-                        <input type="password" name="password" id="password" class="register__input" placeholder="Password" required>
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-venus-mars"></i>
-                        <select name="gender" id="gender" class="register__input" required>
-                            <option value="" disabled selected>Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-info-circle"></i>
-                        <textarea name="biography" id="biography" class="register__input" placeholder="Write a short biography"></textarea>
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-paint-brush"></i>
-                        <input type="text" name="strengths" id="strengths" class="register__input" placeholder="Strengths (e.g., English, Stats)">
-                    </div>
-                    <div class="register__field">
-                        <i class="register__icon fas fa-film"></i>
-                        <input type="text" name="weaknesses" id="weaknesses" class="register__input" placeholder="Weaknesses (e.g., Math, Coding)">
-                    </div>
-                    <button type="submit" class="register__submit">
-                        <span class="button__text">Register Now</span>
-                        <i class="button__icon fas fa-chevron-right"></i>
-                    </button>
-                </form>
+
+    <!-- Wrap the entire multi-step process in a single form -->
+    <form method="POST" action="{{ url_for('register') }}">
+        <div class="container">
+
+            <!-- Logo (optional) -->
+            <div class="logo-container">
+                <!-- Example local path. In practice, use: url_for('static', filename='images/logo.png') -->
+                <img src="C:\Users\Asus\Desktop\SEM 6\STUMBLE\stumble\static\images\logo.png" alt="STUMBL Logo">
             </div>
-            <!-- Interior Shapes -->
-            <div class="screen__background">
-                <span class="screen__background__shape screen__background__shape4"></span>
-                <span class="screen__background__shape screen__background__shape3"></span>
-                <span class="screen__background__shape screen__background__shape2"></span>
-                <span class="screen__background__shape screen__background__shape1"></span>
+
+            <!-- SLAB 1: Basic Information -->
+            <div class="slab active" id="slab1">
+                <h2>Basic Information</h2>
+
+                <div class="field">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" id="full_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" name="email" id="email" required>
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+
+                <div class="field">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required>
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn" onclick="nextSlab(1)">Next</button>
+                </div>
+            </div>
+
+            <!-- SLAB 2: Personal Details -->
+            <div class="slab" id="slab2">
+                <div class="back-arrow" onclick="prevSlab(2)">
+                    <i class="fas fa-arrow-left"></i> Back
+                </div>
+                <h2>Personal Details</h2>
+
+                <div class="field">
+                    <label>Gender</label>
+                    <select name="gender" id="gender">
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" id="dob">
+                </div>
+
+                <div class="field">
+                    <label>Occupation</label>
+                    <select name="occupation" id="occupation" onchange="toggleOtherField('occupation', 'other-occupation-field')">
+                        <option value="">Select</option>
+                        <option>Student</option>
+                        <option>Teacher</option>
+                        <option>Researcher</option>
+                        <option>Engineer</option>
+                        <option>Artist</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field hidden" id="other-occupation-field">
+                    <label>Other Occupation</label>
+                    <input type="text" name="other_occupation" id="other_occupation">
+                </div>
+
+                <div class="field">
+                    <label>Highest Education</label>
+                    <select name="education" id="education" onchange="toggleOtherField('education', 'other-education-field')">
+                        <option value="">Select</option>
+                        <option>High School</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Master's Degree</option>
+                        <option>PhD</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field hidden" id="other-education-field">
+                    <label>Other Education</label>
+                    <input type="text" name="other_education" id="other_education">
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn" onclick="nextSlab(2)">Next</button>
+                </div>
+            </div>
+
+            <!-- SLAB 3: Skills & Preferences -->
+            <div class="slab" id="slab3">
+                <div class="back-arrow" onclick="prevSlab(3)">
+                    <i class="fas fa-arrow-left"></i> Back
+                </div>
+                <h2>Skills & Preferences</h2>
+
+                <div class="field">
+                    <label>Strengths</label>
+                    <input type="text" name="strengths" id="strengths" placeholder="e.g., English, Stats">
+                </div>
+
+                <div class="field">
+                    <label>Weaknesses</label>
+                    <input type="text" name="weaknesses" id="weaknesses" placeholder="e.g., Math, Coding">
+                </div>
+
+                <div class="field">
+                    <label>Bio</label>
+                    <textarea name="bio" id="bio" placeholder="Tell us something about you..."></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Learning Style</label>
+                    <select name="learning-style" id="learning-style" onchange="toggleOtherField('learning-style', 'other-learning-field')">
+                        <option value="">Select</option>
+                        <option>Visual</option>
+                        <option>Auditory</option>
+                        <option>Kinesthetic</option>
+                        <option>Reading/Writing</option>
+                        <option>Logical</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field hidden" id="other-learning-field">
+                    <label>Other Learning Style</label>
+                    <input type="text" name="other-learning" id="other-learning">
+                </div>
+
+                <div class="field">
+                    <label>Teaching Style</label>
+                    <select name="teaching-style" id="teaching-style" onchange="toggleOtherField('teaching-style', 'other-teaching-field')">
+                        <option value="">Select</option>
+                        <option>Demonstrator</option>
+                        <option>Facilitator</option>
+                        <option>Delegator</option>
+                        <option>Authoritative</option>
+                        <option>Interactive</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field hidden" id="other-teaching-field">
+                    <label>Other Teaching Style</label>
+                    <input type="text" name="other-teaching" id="other-teaching">
+                </div>
+
+                <!-- Final submit button -->
+                <button type="submit" class="btn">Register Now</button>
             </div>
         </div>
-    </div>
+    </form>
 
+    <!-- JavaScript for multi-step and dynamic field toggles -->
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            const nameField = document.getElementById('name');
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
-            const genderSelect = document.getElementById('gender');
+        function nextSlab(current) {
+            document.getElementById(`slab${current}`).classList.remove('active');
+            document.getElementById(`slab${current + 1}`).classList.add('active');
+        }
 
-            if (nameField.value.trim() === '') {
-                alert('Please enter your full name.');
-                nameField.focus();
-                event.preventDefault();
-                return;
-            }
-            if (emailField.value.trim() === '') {
-                alert('Please enter your email.');
-                emailField.focus();
-                event.preventDefault();
-                return;
-            }
-            if (passwordField.value.trim() === '') {
-                alert('Please enter a password.');
-                passwordField.focus();
-                event.preventDefault();
-                return;
-            }
-            if (!genderSelect.value) {
-                alert('Please select a gender.');
-                genderSelect.focus();
-                event.preventDefault();
-                return;
-            }
-        });
+        function prevSlab(current) {
+            document.getElementById(`slab${current}`).classList.remove('active');
+            document.getElementById(`slab${current - 1}`).classList.add('active');
+        }
+
+        function toggleOtherField(selectId, inputFieldId) {
+            var selectedValue = document.getElementById(selectId).value;
+            var inputField = document.getElementById(inputFieldId);
+            inputField.classList.toggle("hidden", selectedValue !== "Other");
+        }
     </script>
-</body>
 
+</body>
 </html>
