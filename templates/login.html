@@ -3,293 +3,186 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login Form</title>
-    <!-- Font Awesome for icons -->
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
-    <!-- Link to external stylesheet (optional) -->
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="shortcut icon" href="R (2).png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - STUMBLE</title>
+    
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
-    <style>
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
 
+     <!-- Load Special Elite font -->
+     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+
+    <style>
+        @font-face {
+            font-family: 'Slackey';
+            src: url('Slackey-Regular.ttf') format('truetype');
+        }
+
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Raleway, sans-serif;
         }
 
+
         body {
-            /* Updated background to shades of #F5F5DC */
-            background: linear-gradient(90deg, #064927, #eae8d5);
+            background: #f5f5dc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Special Elite', cursive;
         }
 
         .container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .screen {
-            /* Updated form interior with shades of #1f453d */
-            background: linear-gradient(90deg, #1f453d, #164030);
             position: relative;
-            height: 600px;
-            width: 400px;
-            box-shadow: 0px 0px 24px #000;
-            border-radius: 15px;
-        }
-
-        .screen__content {
-            z-index: 1;
-            position: relative;
-            height: 100%;
-        }
-
-        .screen__background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-            -webkit-clip-path: inset(0 0 0 0);
-            clip-path: inset(0 0 0 0);
-        }
-
-        .screen__background__shape {
-            transform: rotate(45deg);
-            position: absolute;
-        }
-
-        .screen__background__shape1 {
-            height: 520px;
-            width: 520px;
-            background: #d1d1c6; /* Light shade of #F5F5DC */
-            top: -50px;
-            right: 120px;
-            border-radius: 0 72px 0 0;
-        }
-
-        .screen__background__shape2 {
-            height: 220px;
-            width: 220px;
-            background: #f5f5dc; /* Light shade of #F5F5DC */
-            top: -172px;
-            right: 0;
-            border-radius: 32px;
-        }
-
-        .screen__background__shape3 {
-            height: 540px;
-            width: 190px;
-            background: linear-gradient(270deg, #1f453d, #164030);
-            top: -24px;
-            right: 0;
-            border-radius: 32px;
-        }
-
-        .screen__background__shape4 {
-            height: 400px;
-            width: 200px;
-            background: #1f453d;
-            top: 420px;
-            right: 50px;
-            border-radius: 60px;
-        }
-
-        .login__field {
-            display: flex;
-            align-items: center;
-            /* Aligns the icon and input field vertically */
-            border-bottom: 2px solid #2F365F;
-            padding: 10px 0;
-            margin: 15px 0;
-            /* Adds spacing between fields */
-        }
-
-        .login__icon {
-            font-size: 18px;
-            color: #1f453d;
-            margin-right: 10px;
-            /* Adds space between the icon and the input field */
-        }
-
-        .login__input {
-            border: none;
-            background: none;
-            font-size: 18px;
-            color: #1f453d;
-            font-weight: 600;
-            flex: 1;
-            /* Makes the input field take the remaining space */
-            padding: 8px 0;
-        }
-
-        .login__input:focus {
-            outline: none;
-        }
-
-        .login__input::placeholder {
-            color: #1f453d;
-            /* Placeholder color */
-        }
-
-        .login {
-            width: 320px;
-            padding: 30px;
-            margin: auto;
-            padding-top: 100px;
+            width: 800px;
+            background: #1f453d00;
+            padding: 50px 30px;
+            border-radius: 100%;
+            box-shadow: 0 0 24px #1f453de4;
+            color: #f5f5dc;
             text-align: center;
+            overflow: hidden;
+            transition: box-shadow 7s ease;
         }
 
-        .login__logo {
-            display: block;
-            margin: 0 auto 30px auto;
-            width: 120px;
+        .container:hover {
+            box-shadow: 0 0 5000px 2000px #17332d;
         }
 
-        .login__input:active,
-        .login__input:focus,
-        .login__input:hover {
-            outline: none;
-            border-bottom-color: #6D8BFF;
-        }
-
-        .login__submit {
-            /* Updated button styles */
-            background: #f5f5dc;
-            color: #1f453d;
-            font-size: 16px;
-            margin-top: 30px;
-            padding: 16px 20px;
-            border-radius: 26px;
-            border: none;
-            text-transform: uppercase;
-            font-weight: 700;
+        .input-group {
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Special Elite', cursive;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
             width: 100%;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
         }
 
-        .login__submit:hover {
-            background: #dcdcbf; /* Slightly darker shade on hover */
-            color: #164030; /* Darker text on hover */
-        }
-
-        .button__icon {
-            font-size: 20px;
-            margin-left: 10px;
-        }
-
-        .social-login {
-            margin-top: 20px;
-            color: #fff;
-        }
-
-        .social-icons {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .social-login__icon {
-            padding: 10px;
+        .input-group label {
+            display: block;
+            margin-bottom: 20px;
+            font-weight: bold;
             color: #1f453d;
-            text-decoration: none;
+            text-align: center;
+            font-family: 'Special Elite', cursive;
+            margin-top: 30px;
+            font-size: 25px;
+            
+        }
+
+        .input-group input {
+            width: 60%;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            color: #f5f5dc;
+            background-color: #1f453d;
+            align-items: center;
+            margin-top: 1px;
             font-size: 20px;
-            transition: transform 0.2s;
+            font-family: 'Special Elite', cursive;
         }
 
-        .social-login__icon:hover {
-            transform: scale(1.2);
+        .btn {
+            background: #1f453d;
+            color: #f5f5dc;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            font-family: 'Slackey', cursive;
+            font-size: 20px;
+            margin-top: 40px;
         }
 
-        /* Additional styles for validation messages (optional) */
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: 5px;
+        .btn:hover {
+            background: #1f453d6b;
+            color: #1f453d;
+        }
+
+        .stumbl_title h1 {
+            font-family: 'Slackey', cursive;
+            color: #1f453d;  /* Beige color */
+            font-size: 5em;   /* Adjust size as needed */
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .login-btn {
+            background: #1f453d00; /* Beige background */
+            color: #1f453d; /* Green shade text */
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            font-family: 'Slackey', cursive;
+            font-size: 20px;
+            margin-top: 30px;
+            display: block;
+            text-align: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .login-btn:hover {
+            background: #1f453d; /* Beige background */
+            color: #f5f5dc;
+            font-size : 22px;
         }
     </style>
 </head>
 
-<body> 
+<body>
     <div class="container">
-        <div class="screen">
-            <div class="screen__content">
-                <!-- Added id="loginForm" for JavaScript validation -->
-                <form id="loginForm" class="login" method="post" action="{{ url_for('login') }}">
-                    <h1>STUMBLE</h1>
-                    <br>    
-                    <div class="login__field">
-                        <i class="login__icon fas fa-user"></i>
-                        <input id="email" name="email" type="email" class="login__input" placeholder="Email">
-                    </div>
-                    <div class="login__field">
-                        <i class="login__icon fas fa-lock"></i>
-                        <input id="password" type="password" name="password" class="login__input" placeholder="Password">
-                    </div>
-                    <button class="button login__submit" type="submit">
-                        <span class="button__text">Log In Now</span>
-                        <i class="button__icon fas fa-chevron-right"></i>
-                    </button>
-                </form>
-            </div>
-            <div class="screen__background">
-                <span class="screen__background__shape screen__background__shape4"></span>
-                <span class="screen__background__shape screen__background__shape3"></span>
-                <span class="screen__background__shape screen__background__shape2"></span>
-                <span class="screen__background__shape screen__background__shape1"></span>
-            </div>
+        <div class="stumbl_title">
+            <h1>stumbl</h1>
         </div>
+        <form id="loginForm" method="post" action="{{ url_for('login') }}">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email">
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn">Log In</button>
+        </form>
+        <a href="{{ url_for('register') }}" class="login-btn">register instead?</a>
     </div>
 
-    <!-- JavaScript for form validation -->
+    
+   
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
-
-            // Basic email format validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            if (emailField.value.trim() === '') {
+            if (!emailField.value.trim()) {
                 alert('Please enter your email.');
                 emailField.focus();
                 event.preventDefault();
                 return;
             }
-
-            if (!emailRegex.test(emailField.value.trim())) {
-                alert('Please enter a valid email address.');
-                emailField.focus();
-                event.preventDefault();
-                return;
-            }
-
-            if (passwordField.value.trim() === '') {
+            
+            if (!passwordField.value.trim()) {
                 alert('Please enter your password.');
                 passwordField.focus();
                 event.preventDefault();
                 return;
             }
-
             if (passwordField.value.length < 6) {
                 alert('Password must be at least 6 characters long.');
                 passwordField.focus();
                 event.preventDefault();
-                return;
             }
-
-            // If all validations pass, allow form submission
         });
     </script>
 </body>
