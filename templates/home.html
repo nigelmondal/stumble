@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stumble - Home</title>
+    <title>stumble - Home</title>
     <link rel="stylesheet" href="static/style.css">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
 
@@ -22,10 +22,10 @@
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 5% auto; 
+            margin: 10% auto; 
             padding: 20px;
-            width: 80%;
-            max-width: 500px;
+            width: 50%;
+            max-width: 400px;
             border-radius: 10px;
         }
         .close-btn {
@@ -87,21 +87,19 @@
 
 <body>
     <div class="side-panel" id="sidebar">
+       <div class = "sidebar-content">
         <br><br>
         <center><h1>stumbl</h1></center>
-        <a href="{{ url_for('foryou_page') }}">for you</a>
-        <a href="{{ url_for('chat') }}">your buddies</a>
-        <a href="{{ url_for('calendar') }}">calendar</a>
-        <a href="{{ url_for('home') }}">profile</a>
-        
-        <br><br><br><br><br><br><br>
-        <!-- ... leftover spacing ... -->
-        
-        <center>
-            <a href="{{ url_for('logout') }}">
-                <button class="logout-btn">Logout</button>
-            </a>
-        </center>
+        <a href="foryou">for you</a>
+        <a href="chat">your buddies</a>
+        <a href="calendar">calendar</a>
+        <a href="home">profile</a><BR>
+        </div>
+            <div class="sidebar-footer">
+                <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
+              </div>
+                
+            
     </div>
     
     <div class="main-content">
@@ -119,8 +117,8 @@
                 <!-- Strengths -->
                 <div class="section">
                     <div class="section-header">
-                        <h2>Strengths</h2>
-                        <button onclick="openModal('strengthsModal')">Edit</button>
+                        <h2>strengths</h2>
+                        <button onclick="openModal('strengthsModal')">✎</button>
                     </div>
                     <div class="bubbles" id="strengths">
                         {% if user['strengths'] %}
@@ -136,8 +134,8 @@
                 <!-- Weaknesses -->
                 <div class="section">
                     <div class="section-header">
-                        <h2>Weaknesses</h2>
-                        <button onclick="openModal('weaknessesModal')">Edit</button>
+                        <h2>stumbles</h2>
+                        <button onclick="openModal('weaknessesModal')">✎</button>
                     </div>
                     <div class="bubbles" id="weaknesses">
                         {% if user['weaknesses'] %}
@@ -156,7 +154,7 @@
                 <div class="section">
                     <div class="section-header">
                         <h2>About You</h2>
-                        <button onclick="openModal('bioModal')" style="float:right;">Edit</button>
+                        <button onclick="openModal('bioModal')" style="float:right;">✎</button>
                     </div>
                     <p>{{ user['bio'] }}</p>
                 </div>
@@ -166,7 +164,7 @@
                 <div class="section">
                     <div class="section-header">
                         <h3>Teaching Style</h3>
-                        <button onclick="openModal('teachingModal')">Edit</button>
+                        <button onclick="openModal('teachingModal')">✎</button>
                     </div>
                     <div class="bubbles">
                         {% if user['teaching_style'] %}
@@ -183,7 +181,7 @@
                 <div class="section">
                     <div class="section-header">
                         <h3>Learning Style</h3>
-                        <button onclick="openModal('learningModal')">Edit</button>
+                        <button onclick="openModal('learningModal')">✎</button>
                     </div>
                     <div class="bubbles">
                         {% if user['learning_style'] %}

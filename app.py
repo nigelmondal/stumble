@@ -14,7 +14,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'AppleC30'
+app.config['MYSQL_PASSWORD'] = 'cs6191$a'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
@@ -361,6 +361,36 @@ def delete_learning_style():
 
     cur.close()
     return redirect(url_for('home'))
+
+
+
+@app.route('/delete_teaching_style', methods=['POST'])
+def delete_teaching_style():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    style_to_delete = request.form.get('styleToDelete')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT teaching_style FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and style_to_delete:
+        styles_list = row['teaching_style'].split(',') if row['teaching_style'] else []
+        styles_list = [s.strip() for s in styles_list if s.strip() and s.strip() != style_to_delete.strip()]
+        updated_styles = ",".join(styles_list)
+        cur.execute("UPDATE user SET learning_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+
+
+
+
 
 @app.route('/logout')
 def logout():

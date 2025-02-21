@@ -3,23 +3,58 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Stumble</title>
-    <!-- Font Awesome for icons (optional, can be removed if not used) -->
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
-    <!-- Link to external stylesheet (optional) -->
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="shortcut icon" href="R (2).png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+
+    <title>stumbl</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
-    <style>
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+   <style>
+       
+        @font-face {
+            font-family: 'Slackey';
+            src: url('Slackey-Regular.ttf') format('truetype');
+        }
+
+
+ 
+
+        /* Shatter Animation - Moves letters randomly */
+        @keyframes shatter {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0.5);
+            }
+        }
+
+        
+
+
+        /* Different movement directions for each letter */
+        .title span:nth-child(1) { --x: -80px; --y: 100px; --r: -30deg; animation-delay: 0s, 1.5s; }
+        .title span:nth-child(2) { --x: 50px; --y: 120px; --r: 20deg; animation-delay: 0.1s, 1.6s; }
+        .title span:nth-child(3) { --x: -60px; --y: 90px; --r: -45deg; animation-delay: 0.2s, 1.7s; }
+        .title span:nth-child(4) { --x: 70px; --y: 110px; --r: 25deg; animation-delay: 0.3s, 1.8s; }
+        .title span:nth-child(5) { --x: -50px; --y: 130px; --r: -20deg; animation-delay: 0.4s, 1.9s; }
+        .title span:nth-child(6) { --x: 60px; --y: 140px; --r: 30deg; animation-delay: 0.5s, 2s; }
+
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Raleway, sans-serif;
+            font-family : 'Slackey', serif;
+            
         }
+
+        html, body {
+            overflow: auto; /* Ensures scrollbars always appear */
+            min-height: 100vh; /* Forces the page to maintain scrollability */
+            height: auto; /* Allows content to expand beyond the viewport */
+        }
+
 
         /* Page background: solid #F5F5DC */
         body {
@@ -30,39 +65,81 @@
             min-height: 100vh;
             padding: 20px;
             position: relative;
+            
         }
 
         /* Title styling */
         .title {
-            position: absolute;
-            top: 20px;
-            left: 40px;
-            font-size: 45px;
-            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            font-size: 350px;
+            font-weight: 800;
             color: #1f453d;
             z-index: 2; /* Ensure title is above shapes */
+            font-family: 'Slackey';
+            position: absolute;
+            top: 20%;
         }
 
+        /* Initially, each letter is above the screen and invisible */
+        .title span {
+            display: inline-block;
+            transform: translateY(-150px);
+            opacity: 0;
+            animation: drop 1.5s ease-out forwards, shatter 3s ease-out 1s forwards;
+        }
+
+        /* Fixed title (appears after animation) */
+        .fixed-title {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 200px;
+            font-family: 'Slackey', serif;
+            color: #1f453d;
+            opacity: 0;
+            animation: fade-in 3.5s ease-out forwards;
+            animation-delay: 3s;
+            font-weight: 100;
+            margin-top: 80px;
+            margin-bottom: 35px;
+        }
+
+        
+
+        /* Fade in the fixed title */
+        @keyframes fade-in {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
         /* Buttons container */
         .buttons-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 60px;
             align-items: center;
             z-index: 2; /* Ensure buttons are above shapes */
             position: relative; /* Required for z-index to work */
+            font-family : 'SpecialElite', serif;
+            opacity: 0;
+            animation: fade-in 3s ease-out forwards;
+            animation-delay: 3s; /* Same as fixed title */
+            margin-left: -1%;
+            margin-top: 100px;
         }
 
         /* Button styling */
         .btn {
-            background: #1f453d; /* Button background color */
-            color: #F5F5DC; /* Beige font color */
-            font-size: 18px;
+            background: #f5f5dc11; 
+            color: #1f453d; /* Beige font color */
+            font-size: 45px;
             padding: 15px 30px;
             border: none; /* Removed border */
-            border-radius: 30px;
+            border-radius: 100%;
             cursor: pointer;
-            width: 200px;
+            width: 300px;
             text-align: center;
             text-transform: uppercase;
             font-weight: 700;
@@ -70,6 +147,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
             text-decoration: none; /* Remove underline from links */
             display: block; /* Ensure links behave like buttons */
+            font-family : 'Slackey', serif;
         }
 
         .btn:hover {
@@ -77,6 +155,7 @@
             color: #F5F5DC; /* Maintain beige font color */
             transform: translateY(-2px); /* Slight lift on hover */
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+            font-size : 30px;
         }
 
         /* Responsive Design */
@@ -85,6 +164,7 @@
                 width: 150px;
                 padding: 12px 20px;
                 font-size: 16px;
+                font-family : 'SpecialElite', serif;
             }
 
             .title {
@@ -93,17 +173,7 @@
             }
         }
 
-        /* Optional: Decorative shapes similar to login/register pages */
-        .shape-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1; /* Ensure shapes are below buttons and title */
-            overflow: hidden;
-            border-radius: 15px;
-        }
+       
 
         .shape {
             position: absolute;
@@ -127,28 +197,39 @@
             bottom: -60px;
             left: -60px;
         }
+
+        @keyframes tilt {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(-5deg); }
+            40% { transform: rotate(5deg); }
+            60% { transform: rotate(-10deg); }
+            80% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
     </style>
 </head>
 
 <body>
+    
     <!-- Page Title -->
-    <div class="title">STUMBLE</div>
+    <div class="title">
+        <span>s</span><span>t</span><span>u</span><span>m</span><span>b</span><span>l</span>
+    </div>
+    
+    <div class="fixed-title">stumbl</div>
 
-    <!-- Optional decorative shapes -->
-    <div class="shape-container">
-        <div class="shape shape1"></div>
-        <div class="shape shape2"></div>
-    </div>  
+  
 
     <!-- Buttons Container -->
     <div class="buttons-container">
         <a href="{{ url_for('login') }}" class="btn">
-            Login
+            LOGIN
         </a>
         <a href="{{ url_for('register') }}" class="btn">
             Register
         </a>
     </div>
+
 </body>
 
 </html>
