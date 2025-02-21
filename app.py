@@ -14,7 +14,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'cs6191$a'
+app.config['MYSQL_PASSWORD'] = 'AppleC30'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
@@ -162,9 +162,10 @@ def login():
     return render_template('login.html')
 
 
+### HOME PAGE ROUTE ###
 @app.route('/home')
 def home():
-    """Home page: only accessible if logged in."""
+    """Render home page with user details."""
     if 'user_id' not in session:
         flash('Please log in to access your home page.', 'warning')
         return redirect(url_for('login'))
@@ -173,46 +174,64 @@ def home():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
     user = cur.fetchone()
-    print(user)
     cur.close()
 
     return render_template('home.html', user=user)
 
 
-@app.route('/logout')
-def logout():
-    """Log out the current user."""
-    session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
-
+### ADD / DELETE STRENGTH ###
 @app.route('/add_strength', methods=['POST'])
 def add_strength():
     if 'user_id' not in session:
-        flash('Please log in first.')
+        flash('Please log in first.', 'warning')
         return redirect(url_for('login'))
 
     new_strength = request.form.get('newStrength')
     user_id = session['user_id']
 
-    # Append the new strength to the existing list
     cur = mysql.connection.cursor()
     cur.execute("SELECT strengths FROM user WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
+    
     if row and new_strength:
         old_strengths = row['strengths'] or ''
-        updated_strengths = (old_strengths + ',' + new_strength).strip(',')  # handle edge cases
+        updated_strengths = old_strengths + ',' + new_strength if old_strengths else new_strength
         cur.execute("UPDATE user SET strengths=%s WHERE user_id=%s", (updated_strengths, user_id))
         mysql.connection.commit()
-    cur.close()
 
+    cur.close()
     return redirect(url_for('home'))
 
 
+@app.route('/delete_strength', methods=['POST'])
+def delete_strength():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    strength_to_delete = request.form.get('strengthToDelete')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT strengths FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+    
+    if row and strength_to_delete:
+        strengths_list = row['strengths'].split(',') if row['strengths'] else []
+        strengths_list = [s.strip() for s in strengths_list if s.strip() and s.strip() != strength_to_delete.strip()]
+        updated_strengths = ",".join(strengths_list)
+        cur.execute("UPDATE user SET strengths=%s WHERE user_id=%s", (updated_strengths, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+
+### ADD / DELETE WEAKNESS ###
 @app.route('/add_weakness', methods=['POST'])
 def add_weakness():
     if 'user_id' not in session:
-        flash('Please log in first.')
+        flash('Please log in first.', 'warning')
         return redirect(url_for('login'))
 
     new_weakness = request.form.get('newWeakness')
@@ -221,23 +240,136 @@ def add_weakness():
     cur = mysql.connection.cursor()
     cur.execute("SELECT weaknesses FROM user WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
+
     if row and new_weakness:
         old_weaknesses = row['weaknesses'] or ''
-        updated_weaknesses = (old_weaknesses + ',' + new_weakness).strip(',')
+        updated_weaknesses = old_weaknesses + ',' + new_weakness if old_weaknesses else new_weakness
         cur.execute("UPDATE user SET weaknesses=%s WHERE user_id=%s", (updated_weaknesses, user_id))
         mysql.connection.commit()
-    cur.close()
 
+    cur.close()
     return redirect(url_for('home'))
 
+
+@app.route('/delete_weakness', methods=['POST'])
+def delete_weakness():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    weakness_to_delete = request.form.get('weaknessToDelete')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT weaknesses FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and weakness_to_delete:
+        weaknesses_list = row['weaknesses'].split(',') if row['weaknesses'] else []
+        weaknesses_list = [w.strip() for w in weaknesses_list if w.strip() and w.strip() != weakness_to_delete.strip()]
+        updated_weaknesses = ",".join(weaknesses_list)
+        cur.execute("UPDATE user SET weaknesses=%s WHERE user_id=%s", (updated_weaknesses, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+
+### UPDATE BIO ###
 @app.route('/update_bio', methods=['POST'])
 def update_bio():
-    new_bio = request.form['bio']
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
 
-    # Update the user's bio in the database
-    users['bio'] = new_bio
-    mysql.session.commit()
+    new_bio = request.form.get('newBio', '')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE user SET bio=%s WHERE user_id=%s", (new_bio, user_id))
+    mysql.connection.commit()
+    cur.close()
+
+    flash('Bio updated successfully!', 'success')
     return redirect(url_for('home'))
+
+
+### ADD / DELETE LEARNING STYLE ###
+@app.route('/add_learning_style', methods=['POST'])
+def add_learning_style():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    new_style = request.form.get('newLearningStyle')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT learning_style FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and new_style:
+        old_styles = row['learning_style'] or ''
+        updated_styles = old_styles + ',' + new_style if old_styles else new_style
+        cur.execute("UPDATE user SET learning_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+@app.route('/add_teaching_style', methods=['POST'])
+def add_teaching_style():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    new_style = request.form.get('newTeachingStyle')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT teaching_style FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and new_style:
+        old_styles = row['teaching_style'] or ''
+        updated_styles = old_styles + ',' + new_style if old_styles else new_style
+        cur.execute("UPDATE user SET teaching_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+@app.route('/delete_learning_style', methods=['POST'])
+def delete_learning_style():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    style_to_delete = request.form.get('styleToDelete')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT learning_style FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and style_to_delete:
+        styles_list = row['learning_style'].split(',') if row['learning_style'] else []
+        styles_list = [s.strip() for s in styles_list if s.strip() and s.strip() != style_to_delete.strip()]
+        updated_styles = ",".join(styles_list)
+        cur.execute("UPDATE user SET learning_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
+
+@app.route('/logout')
+def logout():
+    """Log out the current user."""
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+
 
 @app.route("/get_recommendations")
 def get_recommendations():
