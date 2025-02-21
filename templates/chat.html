@@ -19,19 +19,22 @@
 
 <body>
 
-    <div class="side-panel">
-
-        <a href = "home""><center><h1>STUMBLE</h1></center></a>
-
-        <nav>
-            <a href="foryou">🔍 For You</a>
-            <a href="chat">🔗 Your Buddies</a>
-            <a href="calendar">📅 Calendar</a>
-            <a href = "home"">Profile</a>
-
-        </nav>
-
-    </div>
+    <div class="side-panel" id="sidebar">
+        <div class = "sidebar-content">
+         <br><br>
+         <center><h1>stumbl</h1></center>
+         <a href="foryou">explore</a>
+         <a href="chat">your buddies</a>
+         <a href="calendar">calendar</a>
+         <a href="home">profile</a><BR>
+         </div>
+             <div class="sidebar-footer">
+                 <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
+               </div>
+                 
+             
+     </div>
+     
 
     <div class="main-content">
 

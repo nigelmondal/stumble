@@ -1,122 +1,119 @@
 @font-face {
-
     font-family: 'Slackey';
-
     src: url('Slackey-Regular.ttf') format('truetype');
-
 }
-
-
 
 @font-face {
-
     font-family: 'Numans';
+    src: url("SpecialElite-Regular.ttf") format('truetype');
+}
 
-    src: url("DarkerGrotesque-Regular.ttf") format('truetype');
+@keyframes tilt {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-5deg); }
+    40% { transform: rotate(5deg); }
+    60% { transform: rotate(-10deg); }
+    80% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+}
 
+.side-panel h1:hover {
+    animation: tilt 1.5s ease-in-out;
 }
 
 
-
-body {
-
+html, body {
     display: flex;
-
     margin: 0;
-
     font-family: 'Numans', serif;
-
-    height: 100vh;
-
+    background-color: #F5F5DC;
+    overflow: hidden;
+    height : 100%;
 }
 
-
-
+/* Side panel styling */
 .side-panel {
-
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes content up, footer stays at the bottom */
+    width: 17vw; /* Adjusts width based on viewport */
+    min-width: 185px; /* Prevents it from becoming too small */
+    max-width: 305px; /* Prevents excessive growth */
+    height: 100vh; 
+    overflow: hidden;
     background-color: #1f453d;
-
-    color: white;
-
-    width: 200px;
-
-    padding: 10px;
-
-    box-sizing: border-box;
-
-    height: 100vh;
-
+    color: #F5F5DC;
+    padding: 20px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    
 }
 
 
 
 .side-panel h1 {
-
-    font-size: 35px;
-
+    margin-top: 0;
+    font-size: clamp(30px, 4vw, 60px);
     font-family: 'Slackey', sans-serif;
-
-    color: #F5F5DC;
-
-    margin-top: 8px;
-
+    color :#F5F5DC;
+    
 }
 
 
 
-.side-panel .menu-item {
-
+.side-panel a {
     display: block;
-
-    color: white;
-
+    color: #F5F5DC;
     text-decoration: none;
-
-    font-size: 20px;
-
-    margin: 8px 0;
-
+    font-size: 24px;
+    margin: 22px 0;
+    transition: font-size 0.3s ease, padding 0.3s ease;
+    border-radius: 5px;
 }
 
-
-
-.side-panel .menu-item:hover {
-
-    text-decoration: underline;
-
+.side-panel a:hover {
+   
+    font-size: 26px;
+    transform: scale(1.1);
+    transition: transform 0.5s ease;
+    color:#1f453d;
+    background: #F5F5DC;
+    cursor: pointer;
+    margin-bottom: 22px; 
+    border: none;
+    
 }
 
-
-
+/* Main content styling */
 .main-content {
-
-    flex-grow: 1;
-
     display: flex;
-
-    flex-direction: row;
-
+    margin-left: 17vw;
+    width: calc(100vw - 17vw);
     height: 100vh;
-
-    overflow: hidden;
-
+    padding: 20px;
+    box-sizing: border-box;
 }
-
+.content-wrapper {
+    
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap; /* Allows stacking on smaller screens */
+    gap: 2vw;
+    height: calc(100vh - 100px); /* Adjust based on header/footer */
+}
 
 
 .friends-list {
-
-    flex: 1;
-
+    width: 25%;
     background-color: #F5F5DC;
-
-    padding: 10px;
-
+    padding: 20px;
     box-sizing: border-box;
-
-    border-right: 1px solid #ccc;
-
-    padding-top: 20px;
+    border-right: 2px solid #1f453d;
+    overflow-y: auto;
 
 }
 
@@ -161,22 +158,14 @@ body {
 
 
 .chat-area {
-
-    flex: 2;
-
+    flex-grow: 1;
     display: flex;
-
     flex-direction: column;
-
-    padding: 10px;
-
-    background-color: #fff;
-
-    box-sizing: border-box;
-
-    height: 100%;
-
+    padding: 20px;
     background-color: #1f453d;
+    box-sizing: border-box;
+    height: 100%;
+    color: white;
 
 }
 
@@ -213,20 +202,11 @@ body {
 .chat-messages {
 
     flex-grow: 1;
-
     overflow-y: auto;
-
-    margin-bottom: 10px;
-
-    padding: 10px;
-
     background: #F5F5DC;
-
-    border: 1px solid #1f453d;
-
+    padding: 10px;
     border-radius: 5px;
-
-    height: calc(100% - 80px);
+    border: 1px solid #1f453d;
 
 }
 
@@ -268,63 +248,79 @@ body {
 
 }
 
-
-
 .chat-input {
-
     display: flex;
-
-    gap: 5px;
-
-    height: 40px;
-
+    gap: 10px;
+    margin-top: 10px;
 }
-
-
 
 .chat-input input {
-
     flex-grow: 1;
-
-    padding: 5px;
-
+    padding: 10px;
     border: 1px solid #ccc;
-
     border-radius: 5px;
-
-    font-size: 14px;
-
-    background-color: #F5F5DC;
-
+    font-size: 16px;
 }
-
-
 
 .chat-input button {
-
-    padding: 5px 10px;
-
-    background-color: #1f453d;
-
-    color: #F5F5DC;
-
+    padding: 10px 15px;
+    background-color: #F5F5DC;
     border: none;
-
     border-radius: 5px;
-
-    font-size: 18px;
-
+    font-size: 16px;
     cursor: pointer;
-
-    font-family: 'Slackey', sans-serif;
-
 }
-
 
 
 .chat-input button:hover {
-
-    background-color: #2a5c4d;
-
+    background-color: #ddd;
 }
 
+
+.logout-btn {
+    background: #F5F5DC; 
+    color: #1f453d; 
+    border: none; 
+    
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 0;
+    font-size: 25px;
+    font-family: 'Slackey', sans-serif;
+    
+}
+
+
+.sidebar-content {
+    flex-grow: 1; /* Pushes footer to bottom */
+    
+  }
+  
+  .sidebar-footer {
+    padding: 10px 0 50px;
+    text-align: center;
+  }
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+.section-header button {
+    font-size: 30px; /* Increase emoji size */
+    background: none; /* Remove default background */
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 100%;
+    color: #1f453d;
+    transition: background 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+
+/* Hover effect */
+.section-header button:hover {
+    background: #1f453d;
+    color: #F5F5DC;
+    border-radius: 100%; /* Optional: Adds rounded corners */
+}
