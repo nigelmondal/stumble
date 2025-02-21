@@ -3,66 +3,63 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>STUMBL Registration</title>
+    <title>stumbl - register</title>
 
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 
-    <!-- Example custom fonts (ensure these files exist or remove the @font-face rules) -->
-    <style>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}"> 
+   
+   
+   <style>
         @font-face {
             font-family: 'Slackey';
             src: url('Slackey-Regular.ttf') format('truetype');
         }
 
-        @font-face {
-            font-family: 'Numans';
-            src: url('DarkerGrotesque-Regular.ttf') format('truetype');
-        }
+     
+
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Numans', sans-serif;
         }
 
         body {
-            background: linear-gradient(90deg, #064927, #eae8d5);
+            background: #f5f5dc;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            font-family: 'Special Elite', cursive;
         }
 
         .container {
             position: relative;
-            width: 500px;
-            background: #1f453d;
+            width: 800px;
+            background: #1f453d00;
             padding: 50px 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 24px #000;
+            border-radius: 80%;
+            box-shadow: 0 0 24px #1f453de4;
             color: #f5f5dc;
             text-align: center;
             overflow: hidden;
+            transition: box-shadow 7s ease; /* Ensure transition is applied */
         }
 
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+        .container:hover {
+            box-shadow: 0 0 5000px 2000px #17332d; /* Spread effect */
         }
 
-        .logo-container img {
-            width: 100px;
-            height: auto;
-        }
+
+       
 
         /* Multi-step slabs */
         .slab {
             display: none;
             transition: all 0.3s ease-in-out;
+            color: #1f453d;
+            margin-bottom: 30px;
         }
 
         .slab.active {
@@ -71,22 +68,38 @@
 
         .field {
             margin-bottom: 15px;
-            text-align: left;
+            text-align: center;  /* Centers everything */
+            font-family: 'Special Elite', cursive;
+            display: flex;
+            flex-direction: column; /* Puts label above input */
+            align-items: center; /* Centers the items */
+            width: 100%;
         }
 
         .field label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             font-weight: bold;
+            color : #1f453d;
+            text-align: center;
+            font-family: 'Special Elite', cursive;
+            margin-top: 8px;
+            font-size: 17px;;
         }
 
         .field input,
         .field select,
         .field textarea {
-            width: 100%;
+            width: 60%;
             padding: 10px;
             border: none;
-            border-radius: 5px;
+            border-radius: 30px;
+            color: #f5f5dc;
+            background-color: #1f453d;
+            align-items: center;
+            margin-top: 1px;
+            font-size : 20px;
+            
         }
 
         .error {
@@ -97,29 +110,37 @@
 
         .nav-buttons {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin-top: 20px;
+            gap : 20px;
         }
 
+        
+
         .btn {
-            background: #f5f5dc;
-            color: #1f453d;
+            background: #1f453d;
+            color: #f5f5dc;
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
             border: none;
+            left: 50%;
+            font-family: 'Slackey', cursive; /* Add this */
+            font-size: 20px;
+            margin-top: 40px;
         }
 
         .btn:hover {
-            background: #dcdcbf;
+            background: #1f453d6b;
+            color: #1f453d;
         }
 
         /* Back arrow styles */
         .back-arrow {
             font-size: 24px;
             cursor: pointer;
-            color: #f5f5dc;
+            color: #1f453d;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -136,6 +157,105 @@
         .hidden {
             display: none;
         }
+
+        .stumbl_title h1 {
+            font-family: 'Slackey', cursive;
+            color: #1f453d;  /* Beige color */
+            font-size: 5em;   /* Adjust size as needed */
+            margin-bottom: 20px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            font-family: 'Special Elite', cursive; /* Add this */
+        }
+        .back-btn {
+    top: 20px;
+    left: 20px;
+    font-size: 20px;
+    padding: 10px 20px;
+    background: #1f453d;
+    color: #f5f5dc;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: 'Slackey', cursive;
+}
+
+.back-btn:hover {
+    background: #1f453d6b;
+}
+
+.login-btn {
+    background: #1f453d; /* Beige background */
+    color: #f5f5dc; /* Green shade text */
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    font-family: 'Slackey', cursive;
+    font-size: 20px;
+    margin-top: 30px;
+    display: block;
+    text-align: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-btn:hover {
+    background: #1f453d; /* Beige background */
+    color: #f5f5dc;
+    font-size : 22px;
+}
+
+
+.alert-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f5f5dc; /* Beige background */
+    color: #1f453d; /* Green text */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    font-family: 'Special Elite', cursive;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 250px;
+}
+
+.alert-box p {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.alert-box button {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background: #1f453d; /* Dark green */
+    color: #f5f5dc; /* Beige text */
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Special Elite', cursive;
+    border-radius: 5px;
+}
+
+.alert-box button:hover {
+    background: #17332d;
+}
+
+.hidden {
+    display: none;
+}
+
+
     </style>
 </head>
 
@@ -145,33 +265,32 @@
     <form method="POST" action="{{ url_for('register') }}">
         <div class="container">
 
-            <!-- Logo (optional) -->
-            <div class="logo-container">
-                <!-- Example local path. In practice, use: url_for('static', filename='images/logo.png') -->
-                <img src="C:\Users\Asus\Desktop\SEM 6\STUMBLE\stumble\static\images\logo.png" alt="STUMBL Logo">
-            </div>
+          <!-- Add this code -->
+                <div class="stumbl_title">
+                    <h1>stumbl</h1>
+                </div>
 
             <!-- SLAB 1: Basic Information -->
             <div class="slab active" id="slab1">
-                <h2>Basic Information</h2>
+                <h2>who are you?</h2><br><br>
 
                 <div class="field">
-                    <label>Full Name</label>
+                    <label>name?</label>
                     <input type="text" name="full_name" id="full_name" required>
                 </div>
 
                 <div class="field">
-                    <label>Email</label>
+                    <label>email id</label>
                     <input type="email" name="email" id="email" required>
                 </div>
 
                 <div class="field">
-                    <label>Password</label>
+                    <label>password (make it strong)</label>
                     <input type="password" name="password" id="password" required>
                 </div>
 
                 <div class="field">
-                    <label>Confirm Password</label>
+                    <label>confirm password</label>
                     <input type="password" name="confirm_password" id="confirm_password" required>
                 </div>
 
@@ -185,10 +304,10 @@
                 <div class="back-arrow" onclick="prevSlab(2)">
                     <i class="fas fa-arrow-left"></i> Back
                 </div>
-                <h2>Personal Details</h2>
+                <h2>about you</h2><br>
 
                 <div class="field">
-                    <label>Gender</label>
+                    <label>gender</label>
                     <select name="gender" id="gender">
                         <option value="">Select</option>
                         <option>Male</option>
@@ -198,12 +317,12 @@
                 </div>
 
                 <div class="field">
-                    <label>Date of Birth</label>
+                    <label>birth-date</label>
                     <input type="date" name="dob" id="dob">
                 </div>
 
                 <div class="field">
-                    <label>Occupation</label>
+                    <label>what do you do?</label>
                     <select name="occupation" id="occupation" onchange="toggleOtherField('occupation', 'other-occupation-field')">
                         <option value="">Select</option>
                         <option>Student</option>
@@ -221,7 +340,7 @@
                 </div>
 
                 <div class="field">
-                    <label>Highest Education</label>
+                    <label>education so far</label>
                     <select name="education" id="education" onchange="toggleOtherField('education', 'other-education-field')">
                         <option value="">Select</option>
                         <option>High School</option>
@@ -238,8 +357,13 @@
                 </div>
 
                 <div class="nav-buttons">
+                    <button type="button" class="btn back-btn" onclick="prevSlab(2)">⟵ Back</button>
                     <button type="button" class="btn" onclick="nextSlab(2)">Next</button>
-                </div>
+                
+            </div>
+                
+                
+
             </div>
 
             <!-- SLAB 3: Skills & Preferences -->
@@ -247,25 +371,25 @@
                 <div class="back-arrow" onclick="prevSlab(3)">
                     <i class="fas fa-arrow-left"></i> Back
                 </div>
-                <h2>Skills & Preferences</h2>
+                <h2>what are you good/bad at?</h2><br>
 
                 <div class="field">
-                    <label>Strengths</label>
+                    <label>strengths</label>
                     <input type="text" name="strengths" id="strengths" placeholder="e.g., English, Stats">
                 </div>
 
                 <div class="field">
-                    <label>Weaknesses</label>
+                    <label>stumbles</label>
                     <input type="text" name="weaknesses" id="weaknesses" placeholder="e.g., Math, Coding">
                 </div>
 
                 <div class="field">
-                    <label>Bio</label>
+                    <label>bio</label>
                     <textarea name="bio" id="bio" placeholder="Tell us something about you..."></textarea>
                 </div>
 
                 <div class="field">
-                    <label>Learning Style</label>
+                    <label>how do you like to learn?</label>
                     <select name="learning-style" id="learning-style" onchange="toggleOtherField('learning-style', 'other-learning-field')">
                         <option value="">Select</option>
                         <option>Visual</option>
@@ -283,7 +407,7 @@
                 </div>
 
                 <div class="field">
-                    <label>Teaching Style</label>
+                    <label>how do you like to teach?</label>
                     <select name="teaching-style" id="teaching-style" onchange="toggleOtherField('teaching-style', 'other-teaching-field')">
                         <option value="">Select</option>
                         <option>Demonstrator</option>
@@ -301,29 +425,149 @@
                 </div>
 
                 <!-- Final submit button -->
+                <button type="button" class="btn back-btn" onclick="prevSlab(3)">⟵ Back</button>
                 <button type="submit" class="btn">Register Now</button>
             </div>
         </div>
+
+        
+
+
+        <a href="{{ url_for('login') }}" class="login-btn">Login instead?</a>
     </form>
+
+    <div id="customAlert" class="alert-box hidden">
+        <p id="alertMessage"></p>
+        <button onclick="closeAlert()">OK</button>
+    </div>
 
     <!-- JavaScript for multi-step and dynamic field toggles -->
     <script>
         function nextSlab(current) {
-            document.getElementById(`slab${current}`).classList.remove('active');
-            document.getElementById(`slab${current + 1}`).classList.add('active');
+            if (validateSlab(current)) {
+                document.getElementById(`slab${current}`).classList.remove('active');
+                document.getElementById(`slab${current + 1}`).classList.add('active');
+            }
         }
-
+    
         function prevSlab(current) {
             document.getElementById(`slab${current}`).classList.remove('active');
             document.getElementById(`slab${current - 1}`).classList.add('active');
         }
-
+    
         function toggleOtherField(selectId, inputFieldId) {
             var selectedValue = document.getElementById(selectId).value;
             var inputField = document.getElementById(inputFieldId);
             inputField.classList.toggle("hidden", selectedValue !== "Other");
         }
+    
+        function validateSlab(current) {
+            let slab = document.getElementById(`slab${current}`);
+            let inputs = slab.querySelectorAll("input, select, textarea");
+    
+            for (let input of inputs) {
+                if (input.hasAttribute("required") && !input.value.trim()) {
+                    showAlert("fill everything.");
+                    return false;
+                }
+                if (input.type === "email" && !validateEmail(input.value)) {
+                    return false;
+                }
+                if (input.type === "password" && input.id === "password" && !validatePassword(input.value)) {
+                    return false;
+                }
+
+                if (input.id === "confirm_password" && !validateConfirmPassword()) { 
+                    return false;
+                }
+                if (input.type === "date" && input.id === "dob" && !validateDOB(input.value)) {
+                    return false;
+                }
+                if (input.id === "bio" && !validateBio(input.value)) {
+                    return false;
+                }
+            } 
+                
+            return true;
+        }
+    
+        function validateEmail(email) {
+            if (!email.includes("@")) {
+                showAlert("Put a real email ID.");
+                return false;
+            }
+            return true;
+        }
+    
+        function validatePassword(password) {
+            let regex = /^.{8,}$/;
+            if (!regex.test(password)) {
+                showAlert("Give a longer password (more than 8 chars).");
+                return false;
+            }
+            return true;
+        }
+    
+        function validateDOB(dob) {
+            let birthDate = new Date(dob);
+            let today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            let monthDiff = today.getMonth() - birthDate.getMonth();
+            let dayDiff = today.getDate() - birthDate.getDate();
+    
+            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                age--;
+            }
+    
+            if (birthDate > today) {
+                showAlert("are you born tomorrow?");
+                return false;
+            }
+            if (age < 13) {
+                showAlert("You must be above 13 years of age, kid.");
+                return false;
+            }
+            return true;
+        }
+    
+        function validateBio(bio) {
+            if (bio.length > 250) {
+                showAlert("Bio must not exceed 250 characters.");
+                return false;
+            }
+            return true;
+        }
+    
+        document.getElementById("bio").addEventListener("input", function () {
+            if (this.value.length > 250) {
+                this.value = this.value.substring(0, 250); // Trim to 250 characters
+            }
+        });
+    
+        // Custom Alert Popup
+        function showAlert(message) {
+            document.getElementById("alertMessage").textContent = message;
+            document.getElementById("customAlert").classList.remove("hidden");
+        }
+    
+        function closeAlert() {
+            document.getElementById("customAlert").classList.add("hidden");
+        }
+
+        function validateConfirmPassword() {
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("confirm_password").value;
+
+            if (password !== confirmPassword) {
+                showAlert("passwords don't match -_-");
+                return false;
+            }
+            return true;
+        }
+
+
     </script>
+    
 
 </body>
 </html>

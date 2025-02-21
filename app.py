@@ -4,6 +4,11 @@ from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 import MySQLdb.cursors
 from psutil import users
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import jaccard_score
+from sklearn.preprocessing import MultiLabelBinarizer
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -453,56 +458,125 @@ def get_recommendations():
     print(profiles)
     return jsonify(profiles)
 
+
 @app.route("/api/foryou")
 def api_foryou():
-    """Fetch top 3 recommended profiles based on user strengths and weaknesses from the database."""
     if "user_id" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
     user_id = session["user_id"]
 
-    # Fetch the current user's strengths and weaknesses
+    # ✅ Fetch all users except the logged-in user
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        """
+        SELECT user_id, full_name, bio, strengths, weaknesses, learning_style, teaching_style 
+        FROM user WHERE user_id != %s
+        """,
+        (user_id,),
+    )
+    users = cursor.fetchall()
+
+    # ✅ Fetch the logged-in user's data
+    cursor.execute(
+        """
+        SELECT strengths, weaknesses, learning_style, teaching_style 
+        FROM user WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    user_data = cursor.fetchone()
+    cursor.close()
+
+    if not users or not user_data:
+        return jsonify([])  # No recommendations available
+
+    # ✅ Extract values safely (handle missing fields)
+    user_strengths = user_data.get("strengths", "")
+    user_weaknesses = user_data.get("weaknesses", "")
+    user_learning = user_data.get("learning_style", "")
+    user_teaching = user_data.get("teaching_style", "")
+
+    # ✅ Convert MySQL result into a DataFrame
+    df = pd.DataFrame(users)
+
+    # ✅ Ensure None values are replaced with empty strings
+    df.fillna("", inplace=True)
+
+        # ✅ **Fix: Define `combined_features`**
+    # ✅ Combine weaknesses of user with strengths of others AND learning vs. teaching
+    df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
+    user_features = user_weaknesses + " " + user_learning
+
+    # ✅ Convert text into sets of words
+    df["combined_features_set"] = df["combined_features"].apply(lambda x: set(x.lower().split()))
+    user_features_set = set(user_features.lower().split())
+
+    # ✅ Fix: Fit MultiLabelBinarizer on BOTH dataset and user input
+    mlb = MultiLabelBinarizer()
+    mlb.fit(df["combined_features_set"].tolist() + [user_features_set])  # ✅ Include user features
+
+    # ✅ Convert to binary vectors
+    binary_matrix = mlb.transform(df["combined_features_set"])
+    user_vector = mlb.transform([user_features_set])
+
+    # ✅ Compute Jaccard similarity
+    df["match_score"] = [jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))]
+
+    # ✅ Sort and return top recommendations
+    recommendations = (
+        df.sort_values(by="match_score", ascending=False)
+        .head(10)[["user_id", "full_name", "bio", "match_score"]]
+        .to_dict(orient="records")
+    )
+
+    return jsonify(recommendations)
+
+
+@app.route('/api/buddies', methods=['POST'])
+def manage_buddy_relationship():
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.get_json()
+    buddy_id = data.get('buddy_id') # changed from data['buddyId']
+    liked = data.get('liked') # changed from data['liked']
+
+    if buddy_id is None or liked is None:
+        return jsonify({"error": "buddy_id and liked are required"}), 400
+
+    liked = bool(liked)  # Ensure liked is a boolean
+
     cur = mysql.connection.cursor()
-    cur.execute("SELECT strengths, weaknesses FROM user WHERE user_id = %s", (user_id,))
-    user_data = cur.fetchone()
-    
-    if not user_data:
-        return jsonify([])  # No user data found
 
-    user_strengths = user_data['strengths'].split(",") if user_data['strengths'] else []
-    user_weaknesses = user_data['weaknesses'].split(",") if user_data['weaknesses'] else []
+    try:
+        if liked:
+            cur.execute("""
+                INSERT INTO buddies (user_id, buddy_id, liked)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE liked = %s
+            """, (session['user_id'], buddy_id, liked, liked))
+        else:
+            cur.execute("""
+                INSERT INTO buddies (user_id, buddy_id, liked)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE liked = %s
+            """, (session['user_id'], buddy_id, liked, liked))
 
-    # Fetch other users
-    query = """
-        SELECT user_id, full_name, age, bio, strengths, weaknesses, collab_count 
-        FROM user 
-        WHERE user_id != %s
-    """
-    cur.execute(query, (user_id,))
-    all_profiles = cur.fetchall()
-    
-    cur.close()
+        mysql.connection.commit()
+        cur.close()
 
-    # Calculate match score and sort profiles
-    profiles = []
-    for profile in all_profiles:
-        profile_strengths = profile['strengths'].split(",") if profile['strengths'] else []
-        profile_weaknesses = profile['weaknesses'].split(",") if profile['weaknesses'] else []
-        match_score = len(set(user_strengths) & set(profile_strengths)) + len(set(user_weaknesses) & set(profile_weaknesses))
-        
-        profiles.append({
-            "id": profile['user_id'],
-            "name": profile['full_name'],
-            "age": profile['age'],
-            "bio": profile['bio'],
-            "match_score": match_score,
-            "collab_count": profile['collab_count']
-        })
-    
-    # Sort by highest match score, then by collaboration count, and take top 3
-    profiles = sorted(profiles, key=lambda x: (x["match_score"], x["collab_count"]), reverse=True)[:3]
+        return jsonify({"status": "success"})
 
-    return jsonify(profiles)
+    except Exception as e:
+        mysql.connection.rollback()
+        cur.close()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/testinline')
+def test_inline():
+    return render_template('test.html')
+
 
 
 @app.route('/get_meetings')
