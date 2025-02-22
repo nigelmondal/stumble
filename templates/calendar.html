@@ -51,7 +51,7 @@
                     <label for="appointmentDate">Date:</label>
                     <input type="date" id="appointmentDate" required>
 
-                    <label for="stumbleBuddy">Stumble Buddy:</label>
+          <label for="stumbleBuddy">Stumble Buddy (matched only):</label>
                     <select id="stumbleBuddy" required>
                         {% for buddy in buddies %}
                             <option value="{{ buddy.user_id }}">{{ buddy.full_name }}</option>
@@ -90,36 +90,38 @@
 function renderCalendar() {
     calendarGrid.innerHTML = ""; // Clear previous content
 
-    let monthName = new Date(currentYear, currentMonthIndex).toLocaleString('default', {
-        month: 'long', year: 'numeric'
+      // Display Month+Year
+      const monthName = new Date(currentYear, currentMonthIndex).toLocaleString('default', {
+        month: 'long',
+        year: 'numeric'
     });
     currentMonthEl.textContent = monthName;
 
     const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
 
-    // 🟢 STEP 1: Add days of the week directly to `calendarGrid`
+      // 1) Days of the week headers
     const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     daysOfWeek.forEach(day => {
         let dayDiv = document.createElement("div");
-        dayDiv.className = "day-header";  // Make sure this class is styled properly in CSS
+        dayDiv.className = "day-header";
         dayDiv.textContent = day;
         calendarGrid.appendChild(dayDiv);
     });
 
-    // 🟢 STEP 2: Add empty divs for alignment
+      // 2) Blank spaces before day 1
     for (let i = 0; i < firstDayOfMonth; i++) {
         let emptyDiv = document.createElement("div");
         emptyDiv.className = "empty";
         calendarGrid.appendChild(emptyDiv);
     }
 
-    // 🟢 STEP 3: Add the actual date numbers
+      // 3) Fetch data from server: /get_meetings?year=YYYY&month=MM
     fetch(`/get_meetings?year=${currentYear}&month=${currentMonthIndex + 1}`)
         .then(response => response.json())
         .then(data => {
             for (let day = 1; day <= daysInMonth; day++) {
-                let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
                 let dayDiv = document.createElement("div");
                 dayDiv.className = "day";
@@ -129,11 +131,12 @@ dateLabel.innerHTML = `<strong>${day}</strong>`;
 dateLabel.className = "date-label";
 
 let meetingsContainer = document.createElement('div'); 
-meetingsContainer.className = "meetings-container"; // Add a new container
+            meetingsContainer.className = "meetings-container";
 
 dayDiv.appendChild(dateLabel);
-dayDiv.appendChild(meetingsContainer); // Meetings will go inside this
+            dayDiv.appendChild(meetingsContainer);
 
+            // If server returned meetings for this date:
                 if (data[dateStr]) {
                     let meetingsForDay = data[dateStr];
 
@@ -141,6 +144,7 @@ dayDiv.appendChild(meetingsContainer); // Meetings will go inside this
                         let meetingDiv = document.createElement("div");
                         meetingDiv.className = "meeting";
 
+                // Some color variety
                         let colors = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#8A2BE2", "#FF4500"];
                         let meetingColor = colors[index % colors.length];
 
@@ -160,16 +164,17 @@ dayDiv.appendChild(meetingsContainer); // Meetings will go inside this
                         deleteBtn.style.background = "transparent";
                         deleteBtn.style.cursor = "pointer";
                         deleteBtn.style.color = "white";
-                        deleteBtn.onclick = (e) => {
+                deleteBtn.addEventListener("click", (e) => {
                             e.stopPropagation();
                             deleteMeeting(mtg.meeting_id);
-                        };
+                });
 
                         meetingDiv.appendChild(deleteBtn);
                         meetingsContainer.appendChild(meetingDiv);
                     });
                 }
 
+            // Clicking on a day: open the schedule modal
                 dayDiv.addEventListener("click", () => {
                     document.getElementById("appointmentDate").value = dateStr;
                     appointmentModal.style.display = "block";
@@ -232,14 +237,14 @@ function deleteMeeting(meetingId) {
 
             fetch("/add_meeting", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, buddy_id, description, time })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === "success") {
                     appointmentModal.style.display = "none";
-                    renderCalendar();
+                    renderCalendar(); // Refresh
                 } else {
                     alert("Error adding meeting: " + JSON.stringify(data));
                 }
@@ -247,6 +252,7 @@ function deleteMeeting(meetingId) {
             .catch(err => console.error("Error scheduling meeting:", err));
         });
 
+    // Initial render
         renderCalendar();
     </script>
 

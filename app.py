@@ -3,23 +3,21 @@ from flask_mysqldb import MySQL
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 import MySQLdb.cursors
-from psutil import users
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
 from sklearn.metrics import jaccard_score
 from sklearn.preprocessing import MultiLabelBinarizer
-import pandas as pd
 
 app = Flask(__name__)
 
-# Set a secret key for session management
-# In production, keep this secret and do not commit it to version control.
+# -----------------------------------------------------------------------------------
+# 1) BASIC CONFIG
+# -----------------------------------------------------------------------------------
 app.secret_key = 'YOUR_SECRET_KEY_HERE'
 
-# Configure MySQL connection
+# Configure MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'cs6191$a'
+app.config['MYSQL_PASSWORD'] = 'AppleC30'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
@@ -32,18 +30,22 @@ bcrypt = Bcrypt(app)
 
 @app.route('/')
 def root():
-    """Redirect to home or login depending on session."""
-    #if 'user_id' in session:
-    #    return redirect(url_for('home'))
+    """Redirect to home or show landing page."""
+    # If you want to auto-redirect when logged in:
+    # if 'user_id' in session:
+    #     return redirect(url_for('home'))
     return render_template('index.html')
 
 
+# ------------------------------
+# 2.1) REGISTER
+# ------------------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Register a new user with multi-step fields."""
     if request.method == 'POST':
         # Slab 1: Basic info
-        full_name = request.form.get('full_name') or request.form.get('name')  # Match your HTML input name/id
+        full_name = request.form.get('full_name') or request.form.get('name')
         email = request.form.get('email')
         password_plain = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
@@ -138,6 +140,9 @@ def register():
     return render_template('register.html')
 
 
+# ------------------------------
+# 2.2) LOGIN
+# ------------------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Log in an existing user."""
@@ -167,7 +172,20 @@ def login():
     return render_template('login.html')
 
 
-### HOME PAGE ROUTE ###
+# ------------------------------
+# 2.3) LOGOUT
+# ------------------------------
+@app.route('/logout')
+def logout():
+    """Log out the current user."""
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+
+# ------------------------------
+# 2.4) HOME PAGE
+# ------------------------------
 @app.route('/home')
 def home():
     """Render home page with user details."""
@@ -184,7 +202,9 @@ def home():
     return render_template('home.html', user=user)
 
 
-### ADD / DELETE STRENGTH ###
+# ------------------------------
+# 2.5) EDIT PROFILE - STRENGTHS / WEAKNESSES / BIO
+# ------------------------------
 @app.route('/add_strength', methods=['POST'])
 def add_strength():
     if 'user_id' not in session:
@@ -299,7 +319,9 @@ def update_bio():
     return redirect(url_for('home'))
 
 
-### ADD / DELETE LEARNING STYLE ###
+# ------------------------------
+# 2.6) EDIT PROFILE - LEARNING / TEACHING STYLES
+# ------------------------------
 @app.route('/add_learning_style', methods=['POST'])
 def add_learning_style():
     if 'user_id' not in session:
@@ -393,74 +415,25 @@ def delete_teaching_style():
     return redirect(url_for('home'))
 
 
+# ------------------------------
+# 2.7) FOR YOU PAGE ROUTE
+# ------------------------------
+@app.route("/foryou")
+def foryou_page():
+    """Render the foryou.html template."""
+    return render_template("foryou.html")
 
 
-
-
-@app.route('/logout')
-def logout():
-    """Log out the current user."""
-    session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
-
-
-
-@app.route("/get_recommendations")
-def get_recommendations():
-    """Fetch top 3 recommended profiles based on user strengths and weaknesses from the database."""
-    if "user_id" not in session:
-        return jsonify({"error": "User not logged in"}), 401
-
-    user_id = session["user_id"]
-
-    # Fetch the current user's strengths and weaknesses
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT strengths, weaknesses FROM user WHERE user_id = %s", (user_id,))
-    user_data = cur.fetchone()
-    
-    if not user_data:
-        return jsonify([])  # No user data found
-
-    user_strengths = user_data['strengths'].split(",") if user_data['strengths'] else []
-    user_weaknesses = user_data['weaknesses'].split(",") if user_data['weaknesses'] else []
-
-    # Fetch other users
-    query = """
-        SELECT user_id, full_name, age, bio, strengths, weaknesses, collab_count 
-        FROM user 
-        WHERE user_id != %s
-    """
-    cur.execute(query, (user_id,))
-    all_profiles = cur.fetchall()
-    
-    cur.close()
-
-    # Calculate match score and sort profiles
-    profiles = []
-    for profile in all_profiles:
-        profile_strengths = profile['strengths'].split(",") if profile['strengths'] else []
-        profile_weaknesses = profile['weaknesses'].split(",") if profile['weaknesses'] else []
-        match_score = len(set(user_strengths) & set(profile_strengths)) + len(set(user_weaknesses) & set(profile_weaknesses))
-        
-        profiles.append({
-            "id": profile['user_id'],
-            "name": profile['full_name'],
-            "age": profile['age'],
-            "bio": profile['bio'],
-            "match_score": match_score,
-            "collab_count": profile['collab_count'],
-        })
-    
-    # Sort by highest match score, then by collaboration count, and take top 3
-    profiles = sorted(profiles, key=lambda x: (x["match_score"], x["collab_count"]), reverse=True)[:3]
-
-    print(profiles)
-    return jsonify(profiles)
-
-
+# ------------------------------
+# 2.8) RECOMMENDATION /api/foryou
+# ------------------------------
 @app.route("/api/foryou")
 def api_foryou():
+    """
+    Returns recommended profiles, excluding:
+      - the current user
+      - anyone already in buddies (like/dislike)
+    """
     if "user_id" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -468,20 +441,30 @@ def api_foryou():
 
     # ✅ Fetch all users except the logged-in user
     cursor = mysql.connection.cursor()
+    
+    # Exclude current user + those already recorded in "buddies"
     cursor.execute(
         """
-        SELECT user_id, full_name, bio, strengths, weaknesses, learning_style, teaching_style 
-        FROM user WHERE user_id != %s
+        SELECT user_id, full_name, bio, strengths, weaknesses, 
+               learning_style, teaching_style
+        FROM user
+        WHERE user_id != %s
+          AND user_id NOT IN (
+              SELECT buddy_id 
+              FROM buddies 
+              WHERE user_id = %s
+          )
         """,
-        (user_id,),
+        (user_id, user_id)
     )
     users = cursor.fetchall()
 
-    # ✅ Fetch the logged-in user's data
+    # Fetch the current user's data
     cursor.execute(
         """
         SELECT strengths, weaknesses, learning_style, teaching_style 
-        FROM user WHERE user_id = %s
+        FROM user 
+        WHERE user_id = %s
         """,
         (user_id,),
     )
@@ -489,59 +472,67 @@ def api_foryou():
     cursor.close()
 
     if not users or not user_data:
-        return jsonify([])  # No recommendations available
+        return jsonify([])  # No recommendations
 
-    # ✅ Extract values safely (handle missing fields)
-    user_strengths = user_data.get("strengths", "")
-    user_weaknesses = user_data.get("weaknesses", "")
-    user_learning = user_data.get("learning_style", "")
-    user_teaching = user_data.get("teaching_style", "")
+    # Extract user attributes
+    user_strengths   = user_data.get("strengths", "")
+    user_weaknesses  = user_data.get("weaknesses", "")
+    user_learning    = user_data.get("learning_style", "")
+    user_teaching    = user_data.get("teaching_style", "")
 
-    # ✅ Convert MySQL result into a DataFrame
+    # Convert user list to DataFrame
     df = pd.DataFrame(users)
-
-    # ✅ Ensure None values are replaced with empty strings
     df.fillna("", inplace=True)
 
-        # ✅ **Fix: Define `combined_features`**
-    # ✅ Combine weaknesses of user with strengths of others AND learning vs. teaching
+    # Combine the other user's "strengths + teaching_style"
     df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
+    # The current user: "weaknesses + learning_style"
     user_features = user_weaknesses + " " + user_learning
 
-    # ✅ Convert text into sets of words
+    # Convert to sets for Jaccard
     df["combined_features_set"] = df["combined_features"].apply(lambda x: set(x.lower().split()))
     user_features_set = set(user_features.lower().split())
 
-    # ✅ Fix: Fit MultiLabelBinarizer on BOTH dataset and user input
+    # One-hot encode for Jaccard
     mlb = MultiLabelBinarizer()
-    mlb.fit(df["combined_features_set"].tolist() + [user_features_set])  # ✅ Include user features
-
-    # ✅ Convert to binary vectors
+    mlb.fit(df["combined_features_set"].tolist() + [user_features_set])
     binary_matrix = mlb.transform(df["combined_features_set"])
-    user_vector = mlb.transform([user_features_set])
+    user_vector   = mlb.transform([user_features_set])
 
-    # ✅ Compute Jaccard similarity
-    df["match_score"] = [jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))]
+    # Compute Jaccard Score
+    df["match_score"] = [
+        jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))
+    ]
 
-    # ✅ Sort and return top recommendations
+    # Sort descending by match_score, take top 10
     recommendations = (
         df.sort_values(by="match_score", ascending=False)
-        .head(10)[["user_id", "full_name", "bio", "match_score"]]
-        .to_dict(orient="records")
+          .head(10)[["user_id", "full_name", "bio", "match_score"]]
+          .to_dict(orient="records")
     )
 
     return jsonify(recommendations)
 
 
+# ------------------------------
+# 2.9) BUDDIES (Like/Dislike + Matching)
+# ------------------------------
+
 @app.route('/api/buddies', methods=['POST'])
 def manage_buddy_relationship():
+    """
+    Inserts or updates a buddy record in the buddies table.
+    If a mutual like is detected, sets matched=TRUE in both directions.
+    """
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
     data = request.get_json()
-    buddy_id = data.get('buddy_id') # changed from data['buddyId']
-    liked = data.get('liked') # changed from data['liked']
+    user_id = session['user_id']
+    buddy_id = data.get('buddy_id')
+    liked = data.get('liked')
 
+    # Validate the input
     if buddy_id is None or liked is None:
         return jsonify({"error": "buddy_id and liked are required"}), 400
 
@@ -550,38 +541,136 @@ def manage_buddy_relationship():
     cur = mysql.connection.cursor()
 
     try:
+        # 1) Insert or update the record for the current user's action
+        #    NOTE: We explicitly keep matched = matched on update,
+        #    so we don't lose a prior matched=TRUE.
+        cur.execute("""
+            INSERT INTO buddies (user_id, buddy_id, liked, matched)
+            VALUES (%s, %s, %s, FALSE)
+            ON DUPLICATE KEY UPDATE 
+                liked = VALUES(liked),
+                matched = matched
+        """, (user_id, buddy_id, liked))
+
+        match_made = False
+
+        # 2) If the user "liked," check if buddy also liked them
         if liked:
             cur.execute("""
-                INSERT INTO buddies (user_id, buddy_id, liked)
-                VALUES (%s, %s, %s)
-                ON DUPLICATE KEY UPDATE liked = %s
-            """, (session['user_id'], buddy_id, liked, liked))
-        else:
-            cur.execute("""
-                INSERT INTO buddies (user_id, buddy_id, liked)
-                VALUES (%s, %s, %s)
-                ON DUPLICATE KEY UPDATE liked = %s
-            """, (session['user_id'], buddy_id, liked, liked))
+                SELECT liked, matched 
+                FROM buddies
+                WHERE user_id = %s AND buddy_id = %s
+            """, (buddy_id, user_id))
+            buddy_record = cur.fetchone()
+
+            # If buddy already liked us => mutual like
+            if buddy_record and buddy_record['liked'] == 1:
+                match_made = True
+                # Set matched=TRUE for both rows
+                cur.execute("""
+                    UPDATE buddies
+                    SET matched = TRUE
+                    WHERE (user_id = %s AND buddy_id = %s)
+                       OR (user_id = %s AND buddy_id = %s)
+                """, (user_id, buddy_id, buddy_id, user_id))
 
         mysql.connection.commit()
         cur.close()
 
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "match_made": match_made})
 
     except Exception as e:
         mysql.connection.rollback()
         cur.close()
         return jsonify({"error": str(e)}), 500
 
-@app.route('/testinline')
-def test_inline():
-    return render_template('test.html')
+
+# ------------------------------
+# 2.10) CHAT ROUTES
+# ------------------------------
+@app.route('/chat')
+def chat():
+    """Render Chat page."""
+    return render_template('chat.html')
+
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    data = request.json
+    sender_id = session['user_id']
+    receiver_id = data.get('receiver_id')
+    message = data.get('message')
+
+    if not receiver_id or not message:
+        return jsonify({'error': 'Receiver ID and message are required'}), 400
+
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            INSERT INTO chats (sender_id, receiver_id, message) 
+            VALUES (%s, %s, %s)
+        """, (sender_id, receiver_id, message))
+        mysql.connection.commit()
+        cursor.close()
+        return jsonify({'success': 'Message sent successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/get_messages/<int:receiver_id>', methods=['GET'])
+def get_messages(receiver_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    sender_id = session['user_id']
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        """
+        SELECT sender_id, receiver_id, message, sent_at 
+        FROM chats
+        WHERE (sender_id = %s AND receiver_id = %s) 
+           OR (sender_id = %s AND receiver_id = %s)
+        ORDER BY sent_at ASC
+        """,
+        (sender_id, receiver_id, receiver_id, sender_id)
+    )
+    messages = cursor.fetchall()
+    cursor.close()
+    return jsonify(messages)
+
+
+# ------------------------------
+# 2.11) CALENDAR ROUTES
+# ------------------------------
+@app.route('/calendar')
+def calendar():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    cur = mysql.connection.cursor()
+
+    # Only fetch BUDDIES who have 'matched=TRUE' for this user
+    cur.execute("""
+        SELECT u.user_id, u.full_name
+        FROM buddies b
+        JOIN user u ON u.user_id = b.buddy_id
+        WHERE b.user_id = %s
+          AND b.matched = 1
+    """, (user_id,))
+    buddies = cur.fetchall()
+    cur.close()
+
+    return render_template("calendar.html", buddies=buddies)
 
 
 
 @app.route('/get_meetings')
 def get_meetings():
-    """Return all scheduled meetings for the current user."""
+    """Return all scheduled meetings for the current user (by year/month)."""
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -591,48 +680,60 @@ def get_meetings():
         user_id = session['user_id']
 
         cur = mysql.connection.cursor()
-        cur.execute("""
-            SELECT m.meeting_id, m.meeting_date, m.meeting_time, m.description, 
-                   u.full_name AS buddy_name
+        # We join the 'user' table TWICE: 
+        #   - user_ for m.user_id
+        #   - buddy for m.buddy_id
+        # Then pick the correct "buddy_name" based on which side is our user.
+        query = """
+            SELECT 
+                m.meeting_id,
+                m.meeting_date,
+                m.meeting_time,
+                m.description,
+                CASE 
+                    WHEN m.user_id = %s 
+                        THEN buddy.full_name  -- If I'm the user, show buddy's name
+                    ELSE user_.full_name   -- If I'm the buddy, show the user's name
+                END AS buddy_name
             FROM meetings m
-            JOIN user u ON m.buddy_id = u.user_id
-            WHERE YEAR(m.meeting_date) = %s AND MONTH(m.meeting_date) = %s AND m.user_id = %s
+            JOIN user user_  ON user_.user_id  = m.user_id
+            JOIN user buddy ON buddy.user_id = m.buddy_id
+            WHERE YEAR(m.meeting_date) = %s
+              AND MONTH(m.meeting_date) = %s
+              AND (%s IN (m.user_id, m.buddy_id))
             ORDER BY m.meeting_date, m.meeting_time
-        """, (year, month, user_id))
-
+        """
+        cur.execute(query, (user_id, year, month, user_id))
         meetings = cur.fetchall()
         cur.close()
 
-        meetings_dict = {}
-        for meeting in meetings:
-            date_key = meeting["meeting_date"].strftime("%Y-%m-%d")
+        # Group them by date for easy front-end consumption
+        # { "YYYY-MM-DD": [ {meeting_id, buddy_name, time, description}, ... ], ... }
+        from collections import defaultdict
+        meetings_dict = defaultdict(list)
 
-            # ✅ FIX: Convert timedelta to string if necessary
-            meeting_time = meeting["meeting_time"]
-            if isinstance(meeting_time, timedelta):
-                meeting_time = (datetime.min + meeting_time).time().strftime("%H:%M")
-            else:
-                meeting_time = meeting_time.strftime("%H:%M")
-
-            if date_key not in meetings_dict:
-                meetings_dict[date_key] = []
+        for mtg in meetings:
+            # Convert date/time to strings
+            date_key = mtg["meeting_date"].strftime("%Y-%m-%d")
+            meeting_time = mtg["meeting_time"].strftime("%H:%M")
 
             meetings_dict[date_key].append({
-                "meeting_id": meeting["meeting_id"],
-                "buddy": meeting["buddy_name"],
+                "meeting_id": mtg["meeting_id"],
+                "buddy": mtg["buddy_name"],
                 "time": meeting_time,
-                "description": meeting["description"]
+                "description": mtg["description"]
             })
 
         return jsonify(meetings_dict)
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Return JSON on errors
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/add_meeting', methods=['POST'])
 def add_meeting():
-    """Insert a new meeting into the database."""
+    """Insert a new meeting."""
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -653,6 +754,8 @@ def add_meeting():
 
     return jsonify({"status": "success"})
 
+
+
 @app.route('/delete_meeting', methods=['POST'])
 def delete_meeting():
     """Delete a scheduled meeting."""
@@ -671,79 +774,9 @@ def delete_meeting():
     return jsonify({"status": "success"})
 
 
-
-@app.route("/foryou")
-def foryou_page():
-    return render_template("foryou.html")
-
-# Route for 'Chat' Page
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
-
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
-
-    data = request.json
-    sender_id = session['user_id']
-    receiver_id = data.get('receiver_id')
-    message = data.get('message')
-
-    if not receiver_id or not message:
-        return jsonify({'error': 'Receiver ID and message are required'}), 400
-
-    try:
-        cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO chats (sender_id, receiver_id, message) VALUES (%s, %s, %s)", 
-                       (sender_id, receiver_id, message))
-        mysql.connection.commit()
-        cursor.close()
-        return jsonify({'success': 'Message sent successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/get_messages/<int:receiver_id>', methods=['GET'])
-def get_messages(receiver_id):
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
-
-    sender_id = session['user_id']
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        "SELECT sender_id, receiver_id, message, sent_at FROM chats "
-        "WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s) "
-        "ORDER BY sent_at ASC",
-        (sender_id, receiver_id, receiver_id, sender_id)
-    )
-    messages = cursor.fetchall()
-    cursor.close()
-    return jsonify(messages)
-
-
-# Route for 'Calendar' Page
-@app.route('/calendar')
-def calendar():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    user_id = session['user_id']
-
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT user_id, full_name FROM user WHERE user_id != %s", (user_id,))
-    buddies = cur.fetchall()
-    cur.close()
-
-    return render_template("calendar.html", buddies=buddies)
-
-
-
-#######################################################################
-# RUN
-#######################################################################
-
+# -----------------------------------------------------------------------------------
+# 3) RUN THE APP
+# -----------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # Use host='0.0.0.0' to allow external access on your network
+    # Use host='0.0.0.0' for external access
     app.run(debug=True, host='0.0.0.0', port=5000)

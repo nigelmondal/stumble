@@ -21,7 +21,11 @@
      <a href="home">profile</a><BR>
      </div>
          <div class="sidebar-footer">
-             <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
+      <center>
+        <a href="{{ url_for('logout') }}">
+          <button class="logout-btn">Logout</button>
+        </a>
+      </center>
            </div>
              
          
@@ -88,13 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((data) => {
         console.log("Response from /api/buddies:", data);
         if (data.status === "success") {
-          if (liked) {
-          } else {
-            // Remove from the local array
+          // If a match is made, alert the user
+          if (data.match_made) {
+            alert("It's a match!");
+          }
+          // Remove the current profile from the local array
             profiles.splice(currentIndex, 1);
             if (currentIndex >= profiles.length) {
               currentIndex = 0;
-            }
           }
           updateProfileDisplay();
         } else {
@@ -104,9 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => console.error("Error calling /api/buddies:", err));
   };
   
-  /*********************************************
-   * 3. updateProfileDisplay
-   *********************************************/
+    // 3. Function to update the profile display
   function updateProfileDisplay() {
     const container = document.getElementById("profilesContainer");
     container.innerHTML = "";
@@ -119,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const profile = profiles[currentIndex];
     console.log("Rendering profile:", profile);
   
-    // Create card
+      // Create the profile card
     const card = document.createElement("div");
     card.classList.add("profile-card", "center");
     card.innerHTML = `
@@ -127,13 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
       <p>${profile.bio}</p>
       <p><strong>Match Score:</strong> ${profile.match_score}</p>
       <div class="action-buttons">
-        <button id="likebutton" class="like-button" data-buddy-id="${profile.id}">♡ Like</button>
-        <button id="dislikebutton" class="dislike-button" data-buddy-id="${profile.id}">⊘ Dislike</button>
+          <button id="likebutton" class="like-button" data-buddy-id="${profile.user_id}">♡ Like</button>
+          <button id="dislikebutton" class="dislike-button" data-buddy-id="${profile.user_id}">⊘ Dislike</button>
       </div>
     `;
     container.appendChild(card);
   
-    // Hook up dynamic Like/Dislike
+      // Attach event listeners to the buttons
     const likeBtn = document.getElementById("likebutton");
     const dislikeBtn = document.getElementById("dislikebutton");
   
@@ -151,9 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  /*********************************************
-   * 4. fetchProfiles
-   *********************************************/
+    // 4. Function to fetch profiles from the server
   function fetchProfiles() {
     fetch("/api/foryou")
       .then((res) => res.json())
@@ -172,11 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
   
-  /*********************************************
-   * 5. init
-   *********************************************/
+    // 5. Initialization function to set up event listeners and load profiles
   function init() {
-    console.log("init() called. Setting up event listeners, then fetching profiles.");
+      console.log("init() called. Setting up event listeners and fetching profiles.");
   
     const prevBtn = document.getElementById("prevButton");
     const nextBtn = document.getElementById("nextButton");
@@ -189,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
-  
     if (nextBtn) {
       nextBtn.addEventListener("click", () => {
         if (profiles.length > 0) {
@@ -198,14 +196,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
-  
-    // Final step: load recommended profiles
+      // Fetch profiles on load
     fetchProfiles();
   }
   
-  /*********************************************
-   * 6. Run init() on window load
-   *********************************************/
+    // 6. Run init on window load
   window.onload = init;
   
   </script>
