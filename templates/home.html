@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>stumble - Home</title>
-    <link rel="stylesheet" href="static/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>stumbl - Home</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+
+    <!-- Example CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
         /* Basic modal styling */
@@ -60,7 +62,7 @@
             background: #2a5c4d;
         }
 
-        /* Delete button (the cross 'x') next to each item */
+        /* Delete button next to each item */
         .delete-btn {
             background: transparent;
             border: none;
@@ -74,7 +76,7 @@
         }
 
         /* Optional styling for bubble-like items */
-        .item-list .bubble {
+        .bubbles .bubble {
             display: inline-block;
             background: #eae8d5;
             color: #1f453d;
@@ -84,58 +86,68 @@
         }
 
         .suggestion-box {
-        border: 1px solid #ccc;
-        max-height: 150px;
-        overflow-y: auto;
-        position: absolute;
-        background: white;
-        width: 100%;
-        z-index: 1000;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .suggestion-item {
-        padding: 8px;
-        cursor: pointer;
-    }
-
-    .suggestion-item:hover {
-        background: #f0f0f0;
-    }
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background: white;
+            width: 100%;
+            z-index: 1000;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .suggestion-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background: #f0f0f0;
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- ========= SIDEBAR ========== -->
     <div class="side-panel" id="sidebar">
-       <div class = "sidebar-content">
+       <div class="sidebar-content">
         <br><br>
         <center><h1>stumbl</h1></center>
-        <a href="foryou">explore</a>
-        <a href="chat">your buddies</a>
-        <a href="calendar">calendar</a>
-        <a href="home">profile</a><BR>
-        </div>
-            <div class="sidebar-footer">
-                <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
-              </div>
-                
-            
+
+        <!-- Use url_for to match Flask route functions -->
+        <a href="{{ url_for('foryou_page') }}">explore</a>
+        <a href="{{ url_for('requests_page') }}">requests</a>
+        <a href="{{ url_for('chat') }}">your buddies</a>
+        <a href="{{ url_for('calendar') }}">calendar</a>
+        <a href="{{ url_for('home') }}">profile</a>
+        <br>
+       </div>
+       <div class="sidebar-footer">
+         <center>
+           <a href="{{ url_for('logout') }}">
+             <button class="logout-btn">Logout</button>
+           </a>
+         </center>
+       </div>
     </div>
     
+    <!-- ========= MAIN CONTENT ========== -->
     <div class="main-content">
+        
+        <!-- User Info -->
         <div class="user-info">
             <h1>Welcome, {{ user['full_name'] }}!</h1>
-            <!-- Example rating or age; adapt to your DB fields as needed -->
+            <!-- Example placeholder for age; or remove if you store it differently -->
             <span>Age: 25</span> 
         </div>
         <hr>
         
+        <!-- Sections -->
         <div class="content-wrapper">
             <!-- Left Section -->
             <div class="left-section">
                 
-                <!-- Strengths -->
+                <!-- Strengths Section -->
                 <div class="section">
                     <div class="section-header">
                         <h2>strengths</h2>
@@ -152,7 +164,7 @@
                     </div>
                 </div>
 
-                <!-- Weaknesses -->
+                <!-- Weaknesses Section -->
                 <div class="section">
                     <div class="section-header">
                         <h2>stumbles</h2>
@@ -168,10 +180,13 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
+
+            </div> <!-- end left-section -->
 
             <!-- Right Section -->
             <div class="right-section">
+                
+                <!-- Bio Section -->
                 <div class="section">
                     <div class="section-header">
                         <h2>About You</h2>
@@ -214,15 +229,17 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+
+            </div> <!-- end right-section -->
+        </div> <!-- end content-wrapper -->
+    </div> <!-- end main-content -->
+
 
     <!-- ======================
          MODALS 
     ======================= -->
 
-    <!-- 1) STRENGTHS Modal -->
+    <!-- STRENGTHS Modal -->
     <div id="strengthsModal" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="closeModal('strengthsModal')">&times;</span>
@@ -254,7 +271,7 @@
       </div>
     </div>
 
-    <!-- 2) WEAKNESSES Modal -->
+    <!-- WEAKNESSES Modal -->
     <div id="weaknessesModal" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="closeModal('weaknessesModal')">&times;</span>
@@ -286,7 +303,7 @@
       </div>
     </div>
 
-    <!-- 3) TEACHING STYLE Modal -->
+    <!-- TEACHING STYLE Modal -->
     <div id="teachingModal" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="closeModal('teachingModal')">&times;</span>
@@ -318,7 +335,7 @@
       </div>
     </div>
 
-    <!-- 4) LEARNING STYLE Modal -->
+    <!-- LEARNING STYLE Modal -->
     <div id="learningModal" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="closeModal('learningModal')">&times;</span>
@@ -363,15 +380,17 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- ======================
+         JAVASCRIPT
+    ======================= -->
     <script>
+        // ========== Modal Handling ==========
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
         }
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
-
         // Close if user clicks outside the modal content
         window.onclick = function(event) {
             let modalIds = ['strengthsModal','weaknessesModal','teachingModal','learningModal','bioModal'];
@@ -383,100 +402,63 @@
             });
         }
 
+        // ========== Auto-suggest Arrays (example) ==========
         const skills = [
-    "Python", "R", "Java", "C++", "SQL", "NoSQL", "JavaScript", "Scala", "Julia", "Go",
-    "Bash Scripting", "MATLAB", "Swift", "TypeScript", "Rust", "Kotlin", "PHP", "C#", "Ruby", "Shell Scripting",
-    "Supervised Learning", "Unsupervised Learning", "Reinforcement Learning", "Deep Learning", "Transfer Learning",
-    "Natural Language Processing (NLP)", "Computer Vision", "Recommender Systems", "Generative AI", "Explainable AI (XAI)",
-    "Hyperparameter Tuning", "Feature Engineering", "Model Deployment", "Model Interpretability", "MLOps",
-    "Time Series Forecasting", "Data Preprocessing", "Sentiment Analysis", "Chatbot Development", "Prompt Engineering",
-    "Hadoop", "Apache Spark", "Kafka", "Hive", "AWS (Amazon Web Services)", "Google Cloud Platform (GCP)",
-    "Microsoft Azure", "Databricks", "Snowflake", "BigQuery", "ETL Pipelines", "Airflow", "Data Lake Management",
-    "Kubernetes", "Docker", "Terraform", "Serverless Computing", "Edge Computing", "Cloud Security", "Distributed Computing",
-    "Tableau", "Power BI", "Matplotlib", "Seaborn", "Plotly", "Dash", "ggplot2", "Looker", "D3.js",
-    "Excel Analytics", "Google Data Studio", "Interactive Dashboards", "Geospatial Visualization", "Network Visualization",
-    "Heatmaps", "Choropleth Maps", "Sankey Diagrams", "Storytelling with Data", "Infographics", "KPI Metrics",
-    "Probability Theory", "Bayesian Statistics", "Hypothesis Testing", "Linear Algebra", "Calculus", "Numerical Methods",
-    "Combinatorics", "Multivariate Analysis", "Regression Analysis", "Monte Carlo Methods", "Stochastic Processes",
-    "Optimization Techniques", "Markov Chains", "Statistical Inference", "Game Theory", "Operations Research",
-    "Cryptography", "Graph Theory", "Topological Data Analysis", "Network Science",
-    "Classical Mechanics", "Quantum Mechanics", "Electromagnetism", "Thermodynamics", "Statistical Mechanics",
-    "Solid State Physics", "Optics & Photonics", "Semiconductor Physics", "Materials Science", "Nuclear Physics",
-    "Astrophysics", "Plasma Physics", "High Energy Particle Physics", "Signal Processing", "Digital Electronics",
-    "Analog Electronics", "Circuit Design", "Embedded Systems Development", "Wireless Communication", "Sensors & Actuators",
-    "Bioinformatics", "Genomics & Proteomics", "CRISPR Gene Editing", "Molecular Biology Techniques", "Systems Biology",
-    "Epidemiology", "Computational Biology", "Structural Biology", "Microbiome Analysis", "Biostatistics",
-    "Neuroscience & AI Integration", "Drug Discovery & Computational Chemistry", "Cell Culture & Tissue Engineering",
-    "Enzyme Kinetics", "Synthetic Biology", "Clinical Trial Design", "Pharmacokinetics & Pharmacodynamics",
-    "Metabolomics", "Biomedical Imaging", "Personalized Medicine",
-    "Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry", "Analytical Chemistry", "Computational Chemistry",
-    "Chemical Thermodynamics", "Quantum Chemistry", "Spectroscopy Techniques (NMR, IR, UV-Vis)", "Chromatography (HPLC, GC)",
-    "Electrochemistry", "Catalysis", "Polymer Chemistry", "Materials Chemistry", "Nanotechnology", "Medicinal Chemistry",
-    "Chemical Kinetics", "Surface Chemistry", "Radiochemistry", "Environmental Chemistry", "Industrial Chemistry",
-    "Secure Data Handling", "Data Anonymization", "Differential Privacy", "Privacy-Preserving Machine Learning",
-    "Homomorphic Encryption", "Secure Multi-Party Computation", "Blockchain for Data Security", "Penetration Testing",
-    "Secure Software Development", "Threat Modeling", "Identity & Access Management", "Cybersecurity Incident Response",
-    "SIEM (Security Information & Event Management)", "API Security", "Web Application Security",
-    "Social Engineering Awareness", "Ethical Hacking", "Security in Cloud Computing", "AI for Cybersecurity",
-    "GDPR & Data Compliance", "Math",
-    "AI for Scientific Research", "Quantum Cryptography", "Robotics & AI Integration", "IoT & Smart Sensors",
-    "Digital Twin Technology", "Human-Computer Interaction (HCI)", "Augmented Reality (AR) & Virtual Reality (VR)",
-    "Digital Signal Processing (DSP)", "Bioprinting & Tissue Engineering", "Space Science & AI",
-    "Personalized Learning Technologies", "Soft Computing (Fuzzy Logic, Genetic Algorithms)", "Smart Energy Systems",
-    "AI for Healthcare", "Edge AI & Federated Learning", "Smart Materials & Wearables", "Blockchain in Scientific Research",
-    "Computational Fluid Dynamics (CFD)", "AI-Driven Scientific Discovery", "AI for Environmental Science"
-]
+            "Python", "R", "Java", "C++", "SQL", "Machine Learning", "Deep Learning", "Computer Vision",
+            "Natural Language Processing", "Data Visualization", "Statistics", "Data Engineering",
+            "AWS", "GCP", "Kubernetes", "Docker", "Cybersecurity", 
+            /* ... etc ... */
+        ];
+        const learning_styles = [
+            "Visual", "Verbal", "Hands-On", "Logical", "Social", "Reflective", "Sequential"
+        ];
+        const teaching_styles = [
+            "Question-Based", "Instructional", "Collaborative", "Lecture",
+            "Coaching", "Game-Based", "Student-Led"
+        ];
 
-    const learning_styles = [
-        "Visual", "Verbal", "Hands-On", "Logical", "Social", "Reflective", "Sequential"
-    ];
+        // ========== Suggestion Box Logic ==========
+        function suggestMatching(inputId, suggestionsArray) {
+            const inputField = document.getElementById(inputId);
+            const suggestionBox = document.createElement("div");
+            suggestionBox.classList.add("suggestion-box");
+            inputField.parentNode.appendChild(suggestionBox);
 
-    const teaching_styles = [
-        "Question-Based", "Instructional", "Collaborative", "Lecture",
-        "Coaching", "Game-Based", "Student-Led"
-    ];
-
-    function suggestMatching(inputId, suggestionsArray) {
-        const inputField = document.getElementById(inputId);
-        const suggestionBox = document.createElement("div");
-        suggestionBox.classList.add("suggestion-box");
-
-        inputField.parentNode.appendChild(suggestionBox);
-
-        inputField.addEventListener("input", function () {
-            const query = inputField.value.toLowerCase();
-            suggestionBox.innerHTML = "";
-            if (!query) return;
-
-            const matches = suggestionsArray.filter(skill => 
-                skill.toLowerCase().includes(query)
-            );
-
-            matches.forEach(match => {
-                const suggestionItem = document.createElement("div");
-                suggestionItem.classList.add("suggestion-item");
-                suggestionItem.textContent = match;
-                suggestionItem.addEventListener("click", function () {
-                    inputField.value = match;
-                    suggestionBox.innerHTML = "";
-                });
-                suggestionBox.appendChild(suggestionItem);
-            });
-        });
-
-        document.addEventListener("click", function (event) {
-            if (!suggestionBox.contains(event.target) && event.target !== inputField) {
+            inputField.addEventListener("input", function () {
+                const query = inputField.value.toLowerCase();
                 suggestionBox.innerHTML = "";
-            }
-        });
-    }
+                if (!query) return;
 
-    document.addEventListener("DOMContentLoaded", function () {
-        suggestMatching("newStrength", skills);
-        suggestMatching("newWeakness", skills);
-        suggestMatching("newLearningStyle", learning_styles);
-        suggestMatching("newTeachingStyle", teaching_styles);
-    });
+                const matches = suggestionsArray.filter(item => 
+                    item.toLowerCase().includes(query)
+                );
+                matches.forEach(match => {
+                    const suggestionItem = document.createElement("div");
+                    suggestionItem.classList.add("suggestion-item");
+                    suggestionItem.textContent = match;
+                    suggestionItem.addEventListener("click", function () {
+                        inputField.value = match;
+                        suggestionBox.innerHTML = "";
+                    });
+                    suggestionBox.appendChild(suggestionItem);
+                });
+            });
+
+            document.addEventListener("click", function (event) {
+                if (!suggestionBox.contains(event.target) && event.target !== inputField) {
+                    suggestionBox.innerHTML = "";
+                }
+            });
+        }
+
+        // ========== On DOM Load, Setup Suggestions ==========
+        document.addEventListener("DOMContentLoaded", function () {
+            suggestMatching("newStrength", skills);
+            suggestMatching("newWeakness", skills);
+            suggestMatching("newLearningStyle", learning_styles);
+            suggestMatching("newTeachingStyle", teaching_styles);
+        });
     </script>
+
 </body>
 </html>

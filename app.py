@@ -1,6 +1,6 @@
-from flask import *
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_mysqldb import MySQL
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask_bcrypt import Bcrypt
 import MySQLdb.cursors
 import pandas as pd
@@ -8,10 +8,6 @@ from sklearn.metrics import jaccard_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
 app = Flask(__name__)
-
-# -----------------------------------------------------------------------------------
-# 1) BASIC CONFIG
-# -----------------------------------------------------------------------------------
 app.secret_key = 'YOUR_SECRET_KEY_HERE'
 
 # Configure MySQL
@@ -19,38 +15,26 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'AppleC30'
 app.config['MYSQL_DB'] = 'stumble'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 
-#######################################################################
-# ROUTES
-#######################################################################
-
 @app.route('/')
 def root():
-    """Redirect to home or show landing page."""
-    # If you want to auto-redirect when logged in:
-    # if 'user_id' in session:
-    #     return redirect(url_for('home'))
     return render_template('index.html')
 
-
 # ------------------------------
-# 2.1) REGISTER
+# (2.1) REGISTER
 # ------------------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Register a new user with multi-step fields."""
     if request.method == 'POST':
-        # Slab 1: Basic info
         full_name = request.form.get('full_name') or request.form.get('name')
         email = request.form.get('email')
         password_plain = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
-        # Slab 2: Personal details
         gender = request.form.get('gender')
         dob_str = request.form.get('dob')
         occupation = request.form.get('occupation')
@@ -58,7 +42,6 @@ def register():
         education = request.form.get('education')
         other_education = request.form.get('other_education')
 
-        # Slab 3: Skills & preferences
         strengths = request.form.get('strengths', '')
         weaknesses = request.form.get('weaknesses', '')
         bio = request.form.get('bio', '')
@@ -67,41 +50,40 @@ def register():
         teaching_style = request.form.get('teaching-style')
         other_teaching = request.form.get('other-teaching')
 
-        # 1) Validate passwords match
+        # Password match check
         if password_plain != confirm_password:
             flash('Passwords do not match. Please try again.', 'danger')
             return redirect(url_for('register'))
 
-        # 2) Handle "Other" occupation
+        # Handle "Other" occupation
         if occupation == 'Other' and other_occupation:
             occupation = other_occupation
 
-        # 3) Handle "Other" education
+        # Handle "Other" education
         if education == 'Other' and other_education:
             education = other_education
 
-        # 4) Handle "Other" learning style
+        # Handle "Other" learning style
         if learning_style == 'Other' and other_learning:
             learning_style = other_learning
 
-        # 5) Handle "Other" teaching style
+        # Handle "Other" teaching style
         if teaching_style == 'Other' and other_teaching:
             teaching_style = other_teaching
 
-        # 6) Convert date_of_birth if provided
+        # Convert DOB
         date_of_birth = None
         if dob_str:
-            from datetime import datetime
             try:
                 date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
             except ValueError:
                 flash('Invalid date format. Please use YYYY-MM-DD.', 'danger')
                 return redirect(url_for('register'))
 
-        # 7) Hash the password
+        # Hash password
         password_hashed = bcrypt.generate_password_hash(password_plain).decode('utf-8')
 
-        # 8) Insert into database
+        # Insert into DB
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
@@ -136,59 +118,46 @@ def register():
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
 
-    # If GET request, just render the form template
     return render_template('register.html')
 
-
 # ------------------------------
-# 2.2) LOGIN
+# (2.2) LOGIN
 # ------------------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Log in an existing user."""
     if request.method == 'POST':
-        # Retrieve form data
         email = request.form['email']
         password_plain = request.form['password']
 
-        # Check if user exists
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM user WHERE email=%s", (email,))
         user = cur.fetchone()
         cur.close()
 
-        if user:
-            # Verify password
-            if bcrypt.check_password_hash(user['password'], password_plain):
-                # Login successful
-                session['user_id'] = user['user_id']
-                flash('Logged in successfully!', 'success')
-                return redirect(url_for('home'))
-            else:
-                flash('Invalid email/password combination', 'danger')
+        if user and bcrypt.check_password_hash(user['password'], password_plain):
+            # Login successful
+            session['user_id'] = user['user_id']
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('home'))
         else:
             flash('Invalid email/password combination', 'danger')
 
     return render_template('login.html')
 
-
 # ------------------------------
-# 2.3) LOGOUT
+# (2.3) LOGOUT
 # ------------------------------
 @app.route('/logout')
 def logout():
-    """Log out the current user."""
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-
 # ------------------------------
-# 2.4) HOME PAGE
+# (2.4) HOME
 # ------------------------------
 @app.route('/home')
 def home():
-    """Render home page with user details."""
     if 'user_id' not in session:
         flash('Please log in to access your home page.', 'warning')
         return redirect(url_for('login'))
@@ -201,9 +170,8 @@ def home():
 
     return render_template('home.html', user=user)
 
-
 # ------------------------------
-# 2.5) EDIT PROFILE - STRENGTHS / WEAKNESSES / BIO
+# (2.5) EDIT PROFILE (strengths, weaknesses, bio)
 # ------------------------------
 @app.route('/add_strength', methods=['POST'])
 def add_strength():
@@ -226,7 +194,6 @@ def add_strength():
 
     cur.close()
     return redirect(url_for('home'))
-
 
 @app.route('/delete_strength', methods=['POST'])
 def delete_strength():
@@ -251,8 +218,6 @@ def delete_strength():
     cur.close()
     return redirect(url_for('home'))
 
-
-### ADD / DELETE WEAKNESS ###
 @app.route('/add_weakness', methods=['POST'])
 def add_weakness():
     if 'user_id' not in session:
@@ -274,7 +239,6 @@ def add_weakness():
 
     cur.close()
     return redirect(url_for('home'))
-
 
 @app.route('/delete_weakness', methods=['POST'])
 def delete_weakness():
@@ -299,8 +263,6 @@ def delete_weakness():
     cur.close()
     return redirect(url_for('home'))
 
-
-### UPDATE BIO ###
 @app.route('/update_bio', methods=['POST'])
 def update_bio():
     if 'user_id' not in session:
@@ -318,9 +280,8 @@ def update_bio():
     flash('Bio updated successfully!', 'success')
     return redirect(url_for('home'))
 
-
 # ------------------------------
-# 2.6) EDIT PROFILE - LEARNING / TEACHING STYLES
+# (2.6) EDIT PROFILE - LEARNING / TEACHING STYLES
 # ------------------------------
 @app.route('/add_learning_style', methods=['POST'])
 def add_learning_style():
@@ -339,28 +300,6 @@ def add_learning_style():
         old_styles = row['learning_style'] or ''
         updated_styles = old_styles + ',' + new_style if old_styles else new_style
         cur.execute("UPDATE user SET learning_style=%s WHERE user_id=%s", (updated_styles, user_id))
-        mysql.connection.commit()
-
-    cur.close()
-    return redirect(url_for('home'))
-
-@app.route('/add_teaching_style', methods=['POST'])
-def add_teaching_style():
-    if 'user_id' not in session:
-        flash('Please log in first.', 'warning')
-        return redirect(url_for('login'))
-
-    new_style = request.form.get('newTeachingStyle')
-    user_id = session['user_id']
-
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT teaching_style FROM user WHERE user_id=%s", (user_id,))
-    row = cur.fetchone()
-
-    if row and new_style:
-        old_styles = row['teaching_style'] or ''
-        updated_styles = old_styles + ',' + new_style if old_styles else new_style
-        cur.execute("UPDATE user SET teaching_style=%s WHERE user_id=%s", (updated_styles, user_id))
         mysql.connection.commit()
 
     cur.close()
@@ -389,7 +328,27 @@ def delete_learning_style():
     cur.close()
     return redirect(url_for('home'))
 
+@app.route('/add_teaching_style', methods=['POST'])
+def add_teaching_style():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
 
+    new_style = request.form.get('newTeachingStyle')
+    user_id = session['user_id']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT teaching_style FROM user WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+
+    if row and new_style:
+        old_styles = row['teaching_style'] or ''
+        updated_styles = old_styles + ',' + new_style if old_styles else new_style
+        cur.execute("UPDATE user SET teaching_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        mysql.connection.commit()
+
+    cur.close()
+    return redirect(url_for('home'))
 
 @app.route('/delete_teaching_style', methods=['POST'])
 def delete_teaching_style():
@@ -408,41 +367,31 @@ def delete_teaching_style():
         styles_list = row['teaching_style'].split(',') if row['teaching_style'] else []
         styles_list = [s.strip() for s in styles_list if s.strip() and s.strip() != style_to_delete.strip()]
         updated_styles = ",".join(styles_list)
-        cur.execute("UPDATE user SET learning_style=%s WHERE user_id=%s", (updated_styles, user_id))
+        cur.execute("UPDATE user SET teaching_style=%s WHERE user_id=%s", (updated_styles, user_id))
         mysql.connection.commit()
 
     cur.close()
     return redirect(url_for('home'))
 
-
 # ------------------------------
-# 2.7) FOR YOU PAGE ROUTE
+# (2.7) FOR YOU PAGE
 # ------------------------------
 @app.route("/foryou")
 def foryou_page():
-    """Render the foryou.html template."""
     return render_template("foryou.html")
 
-
 # ------------------------------
-# 2.8) RECOMMENDATION /api/foryou
+# (2.8) RECOMMENDATION: /api/foryou
 # ------------------------------
 @app.route("/api/foryou")
 def api_foryou():
-    """
-    Returns recommended profiles, excluding:
-      - the current user
-      - anyone already in buddies (like/dislike)
-    """
     if "user_id" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
     user_id = session["user_id"]
-
-    # ✅ Fetch all users except the logged-in user
     cursor = mysql.connection.cursor()
     
-    # Exclude current user + those already recorded in "buddies"
+    # Exclude current user + those already recorded in buddies
     cursor.execute(
         """
         SELECT user_id, full_name, bio, strengths, weaknesses, 
@@ -459,7 +408,7 @@ def api_foryou():
     )
     users = cursor.fetchall()
 
-    # Fetch the current user's data
+    # Fetch current user
     cursor.execute(
         """
         SELECT strengths, weaknesses, learning_style, teaching_style 
@@ -472,39 +421,36 @@ def api_foryou():
     cursor.close()
 
     if not users or not user_data:
-        return jsonify([])  # No recommendations
+        return jsonify([])
 
-    # Extract user attributes
     user_strengths   = user_data.get("strengths", "")
     user_weaknesses  = user_data.get("weaknesses", "")
     user_learning    = user_data.get("learning_style", "")
     user_teaching    = user_data.get("teaching_style", "")
 
-    # Convert user list to DataFrame
     df = pd.DataFrame(users)
     df.fillna("", inplace=True)
 
-    # Combine the other user's "strengths + teaching_style"
-    df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
-    # The current user: "weaknesses + learning_style"
+    # Current user features
     user_features = user_weaknesses + " " + user_learning
 
-    # Convert to sets for Jaccard
+    # Other user combined
+    df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
+
+    # Jaccard approach
     df["combined_features_set"] = df["combined_features"].apply(lambda x: set(x.lower().split()))
     user_features_set = set(user_features.lower().split())
 
-    # One-hot encode for Jaccard
     mlb = MultiLabelBinarizer()
     mlb.fit(df["combined_features_set"].tolist() + [user_features_set])
     binary_matrix = mlb.transform(df["combined_features_set"])
     user_vector   = mlb.transform([user_features_set])
 
-    # Compute Jaccard Score
+    from sklearn.metrics import jaccard_score
     df["match_score"] = [
         jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))
     ]
 
-    # Sort descending by match_score, take top 10
     recommendations = (
         df.sort_values(by="match_score", ascending=False)
           .head(10)[["user_id", "full_name", "bio", "match_score"]]
@@ -513,17 +459,11 @@ def api_foryou():
 
     return jsonify(recommendations)
 
-
 # ------------------------------
-# 2.9) BUDDIES (Like/Dislike + Matching)
+# (2.9) BUDDIES (like/dislike + matched)
 # ------------------------------
-
 @app.route('/api/buddies', methods=['POST'])
 def manage_buddy_relationship():
-    """
-    Inserts or updates a buddy record in the buddies table.
-    If a mutual like is detected, sets matched=TRUE in both directions.
-    """
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -532,18 +472,14 @@ def manage_buddy_relationship():
     buddy_id = data.get('buddy_id')
     liked = data.get('liked')
 
-    # Validate the input
     if buddy_id is None or liked is None:
         return jsonify({"error": "buddy_id and liked are required"}), 400
 
-    liked = bool(liked)  # Ensure liked is a boolean
+    liked = bool(liked)
 
     cur = mysql.connection.cursor()
-
     try:
-        # 1) Insert or update the record for the current user's action
-        #    NOTE: We explicitly keep matched = matched on update,
-        #    so we don't lose a prior matched=TRUE.
+        # Insert/update record
         cur.execute("""
             INSERT INTO buddies (user_id, buddy_id, liked, matched)
             VALUES (%s, %s, %s, FALSE)
@@ -554,19 +490,17 @@ def manage_buddy_relationship():
 
         match_made = False
 
-        # 2) If the user "liked," check if buddy also liked them
+        # If we just liked them, check if they liked us
         if liked:
             cur.execute("""
-                SELECT liked, matched 
+                SELECT liked, matched
                 FROM buddies
                 WHERE user_id = %s AND buddy_id = %s
             """, (buddy_id, user_id))
             buddy_record = cur.fetchone()
 
-            # If buddy already liked us => mutual like
             if buddy_record and buddy_record['liked'] == 1:
                 match_made = True
-                # Set matched=TRUE for both rows
                 cur.execute("""
                     UPDATE buddies
                     SET matched = TRUE
@@ -584,15 +518,33 @@ def manage_buddy_relationship():
         cur.close()
         return jsonify({"error": str(e)}), 500
 
-
 # ------------------------------
-# 2.10) CHAT ROUTES
+# (2.10) CHAT ROUTES
 # ------------------------------
 @app.route('/chat')
 def chat():
-    """Render Chat page."""
-    return render_template('chat.html')
+    """
+    Render the chat page with the list of matched buddies.
+    """
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
 
+    user_id = session['user_id']
+    cursor = mysql.connection.cursor()
+    
+    # Fetch all buddies (matched=TRUE) for this user
+    cursor.execute("""
+        SELECT b.buddy_id, u.full_name
+        FROM buddies b
+        JOIN user u ON b.buddy_id = u.user_id
+        WHERE b.user_id = %s
+          AND b.matched = 1
+    """, (user_id,))
+    buddies = cursor.fetchall()
+    cursor.close()
+
+    return render_template('chat.html', buddies=buddies)
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
@@ -619,13 +571,15 @@ def send_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@app.route('/get_messages/<int:receiver_id>', methods=['GET'])
-def get_messages(receiver_id):
+@app.route('/get_messages/<int:buddy_id>', methods=['GET'])
+def get_messages(buddy_id):
+    """
+    Get all messages between the logged-in user and the buddy_id, in ascending time.
+    """
     if 'user_id' not in session:
         return jsonify({'error': 'User not logged in'}), 401
 
-    sender_id = session['user_id']
+    user_id = session['user_id']
     cursor = mysql.connection.cursor()
     cursor.execute(
         """
@@ -635,15 +589,14 @@ def get_messages(receiver_id):
            OR (sender_id = %s AND receiver_id = %s)
         ORDER BY sent_at ASC
         """,
-        (sender_id, receiver_id, receiver_id, sender_id)
+        (user_id, buddy_id, buddy_id, user_id)
     )
     messages = cursor.fetchall()
     cursor.close()
     return jsonify(messages)
 
-
 # ------------------------------
-# 2.11) CALENDAR ROUTES
+# (2.11) CALENDAR
 # ------------------------------
 @app.route('/calendar')
 def calendar():
@@ -653,7 +606,7 @@ def calendar():
     user_id = session['user_id']
     cur = mysql.connection.cursor()
 
-    # Only fetch BUDDIES who have 'matched=TRUE' for this user
+    # Only fetch buddies who have matched=TRUE
     cur.execute("""
         SELECT u.user_id, u.full_name
         FROM buddies b
@@ -666,11 +619,8 @@ def calendar():
 
     return render_template("calendar.html", buddies=buddies)
 
-
-
 @app.route('/get_meetings')
 def get_meetings():
-    """Return all scheduled meetings for the current user (by year/month)."""
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -680,10 +630,6 @@ def get_meetings():
         user_id = session['user_id']
 
         cur = mysql.connection.cursor()
-        # We join the 'user' table TWICE: 
-        #   - user_ for m.user_id
-        #   - buddy for m.buddy_id
-        # Then pick the correct "buddy_name" based on which side is our user.
         query = """
             SELECT 
                 m.meeting_id,
@@ -692,12 +638,12 @@ def get_meetings():
                 m.description,
                 CASE 
                     WHEN m.user_id = %s 
-                        THEN buddy.full_name  -- If I'm the user, show buddy's name
-                    ELSE user_.full_name   -- If I'm the buddy, show the user's name
+                        THEN buddy.full_name
+                    ELSE user_.full_name
                 END AS buddy_name
             FROM meetings m
             JOIN user user_  ON user_.user_id  = m.user_id
-            JOIN user buddy ON buddy.user_id = m.buddy_id
+            JOIN user buddy ON buddy.user_id   = m.buddy_id
             WHERE YEAR(m.meeting_date) = %s
               AND MONTH(m.meeting_date) = %s
               AND (%s IN (m.user_id, m.buddy_id))
@@ -707,16 +653,11 @@ def get_meetings():
         meetings = cur.fetchall()
         cur.close()
 
-        # Group them by date for easy front-end consumption
-        # { "YYYY-MM-DD": [ {meeting_id, buddy_name, time, description}, ... ], ... }
         from collections import defaultdict
         meetings_dict = defaultdict(list)
-
         for mtg in meetings:
-            # Convert date/time to strings
             date_key = mtg["meeting_date"].strftime("%Y-%m-%d")
             meeting_time = mtg["meeting_time"].strftime("%H:%M")
-
             meetings_dict[date_key].append({
                 "meeting_id": mtg["meeting_id"],
                 "buddy": mtg["buddy_name"],
@@ -729,11 +670,8 @@ def get_meetings():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 @app.route('/add_meeting', methods=['POST'])
 def add_meeting():
-    """Insert a new meeting."""
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -754,11 +692,8 @@ def add_meeting():
 
     return jsonify({"status": "success"})
 
-
-
 @app.route('/delete_meeting', methods=['POST'])
 def delete_meeting():
-    """Delete a scheduled meeting."""
     if 'user_id' not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -773,10 +708,111 @@ def delete_meeting():
 
     return jsonify({"status": "success"})
 
+@app.route('/requests')
+def requests_page():
+    if 'user_id' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
 
-# -----------------------------------------------------------------------------------
-# 3) RUN THE APP
-# -----------------------------------------------------------------------------------
+    user_id = session['user_id']
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT b.user_id AS liker_id, u.full_name, u.bio
+        FROM buddies b
+        JOIN user u ON b.user_id = u.user_id
+        WHERE b.buddy_id = %s
+          AND b.liked = 1
+          AND b.matched = 0
+    """, (user_id,))
+    pending_requests = cur.fetchall()
+    cur.close()
+
+    return render_template('requests.html', requests=pending_requests)
+
+
+
+@app.route('/api/requests', methods=['POST'])
+def handle_requests():
+    """
+    Accept or reject a request from someone who 'liked' me.
+    If accepted => we create (or update) user->buddy record as liked=1, 
+       then check if the buddy->user record also has liked=1 => matched=1 for both.
+    If rejected => we can simply remove or set liked=0 for the existing buddy->me record
+       (or keep a record from me->buddy with liked=0 so it won't reappear).
+    """
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.get_json()
+    liker_id = data.get('liker_id')   # The one who liked me
+    accepted = data.get('accepted')   # Boolean (True=accept, False=reject)
+    user_id = session['user_id']      # me
+
+    if liker_id is None or accepted is None:
+        return jsonify({"error": "liker_id and accepted are required"}), 400
+
+    cur = mysql.connection.cursor()
+
+    try:
+        if accepted:
+            # 1) Mark that I like them back
+            cur.execute("""
+                INSERT INTO buddies (user_id, buddy_id, liked, matched)
+                VALUES (%s, %s, %s, FALSE)
+                ON DUPLICATE KEY UPDATE 
+                    liked = VALUES(liked)
+            """, (user_id, liker_id, True))
+
+            # 2) Check if they already liked me => we can set matched=1 for both
+            cur.execute("""
+                SELECT liked 
+                FROM buddies
+                WHERE user_id = %s AND buddy_id = %s
+            """, (liker_id, user_id))
+            buddy_record = cur.fetchone()
+
+            if buddy_record and buddy_record['liked'] == 1:
+                # It's a match => update both rows
+                cur.execute("""
+                    UPDATE buddies
+                    SET matched = TRUE
+                    WHERE (user_id = %s AND buddy_id = %s)
+                       OR (user_id = %s AND buddy_id = %s)
+                """, (user_id, liker_id, liker_id, user_id))
+
+            mysql.connection.commit()
+            cur.close()
+            return jsonify({"status": "success", "message": "Request accepted, potential match made."})
+
+        else:
+            # Rejection path
+            # Option A: Just remove their 'like' row so it won't appear again
+            cur.execute("""
+                DELETE FROM buddies
+                WHERE user_id = %s
+                  AND buddy_id = %s
+                  AND matched = 0
+            """, (liker_id, user_id))
+
+            # Option B: Or we can create a row from me->them with liked=0 
+            # to note I've refused them. (Optional, depending on your logic)
+            # cur.execute("""
+            #   INSERT INTO buddies (user_id, buddy_id, liked, matched)
+            #   VALUES (%s, %s, FALSE, FALSE)
+            #   ON DUPLICATE KEY UPDATE liked=FALSE, matched=FALSE
+            # """, (user_id, liker_id))
+
+            mysql.connection.commit()
+            cur.close()
+            return jsonify({"status": "success", "message": "Request rejected (deleted)."})
+    except Exception as e:
+        mysql.connection.rollback()
+        cur.close()
+        return jsonify({"error": str(e)}), 500
+
+
+# ------------------------------
+# RUN APP
+# ------------------------------
 if __name__ == '__main__':
-    # Use host='0.0.0.0' for external access
     app.run(debug=True, host='0.0.0.0', port=5000)
