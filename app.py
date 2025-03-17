@@ -13,7 +13,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'AppleC30'
+app.config['MYSQL_PASSWORD'] = 'cs6191$a'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -379,6 +379,7 @@ def delete_teaching_style():
 @app.route("/foryou")
 def foryou_page():
     return render_template("foryou.html")
+
 
 # ------------------------------
 # (2.8) RECOMMENDATION: /api/foryou
