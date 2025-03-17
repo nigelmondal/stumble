@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stumble - For You Page</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+  <!-- Your CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='foryou_css.css') }}">
+
+</head>
+ 
+<body>
+  <div class="side-panel" id="sidebar">
+    <div class = "sidebar-content">
+     <br><br>
+     <center><h1>stumbl</h1></center>
+     <a href="foryou">explore</a>
+     <a href="chat">your buddies</a>
+     <a href="calendar">calendar</a>
+     <a href="home">profile</a><BR>
+     </div>
+         <div class="sidebar-footer">
+      <center>
+        <a href="{{ url_for('logout') }}">
+          <button class="logout-btn">Logout</button>
+        </a>
+      </center>
+           </div>
+             
+         
+ </div>
+
+  <div class="main-content">
+    <h1 class="center-title">Choose Your Buddy</h1>
+    <div class="profiles-container" id="profilesContainer">
+      <!-- Profiles will be dynamically rendered here -->
+    </div>
+
+    <!-- Navigation for previous/next profiles -->
+    <div class="navigation">
+      <button class="nav-button" id="prevButton">❮</button>
+      <button class="nav-button" id="nextButton">❯</button>
+    </div>
+  </div>
+
+  <!-- Optional popup (if you still intend to show profile details in a popup) -->
+  <div class="profile-popup" id="profilePopup">
+    <div class="popup-content">
+      <span class="close" id="closePopup">&times;</span>
+      <h2 id="popupName"></h2>
+      <p><strong>Bio:</strong> <span id="popupBio"></span></p>
+      <h3>Strengths:</h3>
+      <p id="popupStrengths"></p>
+      <h3>Weaknesses:</h3>
+      <p id="popupWeaknesses"></p>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <script>
+      /*********************************************
+ * 0. Remove Potential Overflow Causing Hiding
+ *********************************************/
+document.addEventListener("DOMContentLoaded", () => {
+    // Try to unhide if any CSS was interfering
+    document.body.style.overflow = "auto";
+  });
+  
+  /*********************************************
+   * 1. GLOBAL VARIABLES
+   *********************************************/
+  let currentIndex = 0;
+  let profiles = [];
+  
+  /*********************************************
+   * 2. Make updateBuddyRelationship Global
+   *    (So inline onclick works)
+   *********************************************/
+  window.updateBuddyRelationship = function updateBuddyRelationship(buddyId, liked) {
+    console.log("API call to /api/buddies with:", { buddyId, liked });
+  
+    fetch("/api/buddies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ buddy_id: buddyId, liked: liked })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Response from /api/buddies:", data);
+        if (data.status === "success") {
+          // If a match is made, alert the user
+          if (data.match_made) {
+            alert("It's a match!");
+          }
+          // Remove the current profile from the local array
+            profiles.splice(currentIndex, 1);
+            if (currentIndex >= profiles.length) {
+              currentIndex = 0;
+          }
+          updateProfileDisplay();
+        } else {
+          console.error("Error from /api/buddies:", data.error);
+        }
+      })
+      .catch((err) => console.error("Error calling /api/buddies:", err));
+  };
+  
+    // 3. Function to update the profile display
+  function updateProfileDisplay() {
+    const container = document.getElementById("profilesContainer");
+    container.innerHTML = "";
+  
+    if (!profiles || profiles.length === 0) {
+      container.innerHTML = "<p>No matching profiles found.</p>";
+      return;
+    }
+  
+    const profile = profiles[currentIndex];
+    console.log("Rendering profile:", profile);
+  
+      // Create the profile card
+    const card = document.createElement("div");
+    card.classList.add("profile-card", "center");
+    card.innerHTML = `
+      <h2>${profile.full_name}</h2>
+      <p>${profile.bio}</p>
+      <p><strong>Match Score:</strong> ${profile.match_score}</p>
+      <div class="action-buttons">
+          <button id="likebutton" class="like-button" data-buddy-id="${profile.user_id}">♡ Like</button>
+          <button id="dislikebutton" class="dislike-button" data-buddy-id="${profile.user_id}">⊘ Dislike</button>
+      </div>
+    `;
+    container.appendChild(card);
+  
+      // Attach event listeners to the buttons
+    const likeBtn = document.getElementById("likebutton");
+    const dislikeBtn = document.getElementById("dislikebutton");
+  
+    if (likeBtn) {
+      likeBtn.addEventListener("click", (event) => {
+        const buddyId = event.target.dataset.buddyId;
+        updateBuddyRelationship(buddyId, true);
+      });
+    }
+    if (dislikeBtn) {
+      dislikeBtn.addEventListener("click", (event) => {
+        const buddyId = event.target.dataset.buddyId;
+        updateBuddyRelationship(buddyId, false);
+      });
+    }
+  }
+  
+    // 4. Function to fetch profiles from the server
+  function fetchProfiles() {
+    fetch("/api/foryou")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Profiles from /api/foryou:", data);
+        if (data.error) {
+          document.getElementById("profilesContainer").innerHTML = "<p>User not logged in.</p>";
+          return;
+        }
+        profiles = data;
+        currentIndex = 0;
+        updateProfileDisplay();
+      })
+      .catch((err) => {
+        console.error("Error fetching /api/foryou:", err);
+      });
+  }
+  
+    // 5. Initialization function to set up event listeners and load profiles
+  function init() {
+      console.log("init() called. Setting up event listeners and fetching profiles.");
+  
+    const prevBtn = document.getElementById("prevButton");
+    const nextBtn = document.getElementById("nextButton");
+  
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (profiles.length > 0) {
+          currentIndex = (currentIndex - 1 + profiles.length) % profiles.length;
+          updateProfileDisplay();
+        }
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (profiles.length > 0) {
+          currentIndex = (currentIndex + 1) % profiles.length;
+          updateProfileDisplay();
+        }
+      });
+    }
+      // Fetch profiles on load
+    fetchProfiles();
+  }
+  
+    // 6. Run init on window load
+  window.onload = init;
+  
+  </script>
+
+</body>
+</html>

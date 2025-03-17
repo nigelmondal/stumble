@@ -17,7 +17,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'AppleC30'
+app.config['MYSQL_PASSWORD'] = 'cs6191$a'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # Return rows as dictionaries
 
@@ -422,6 +422,11 @@ def delete_teaching_style():
 def foryou_page():
     """Render the foryou.html template."""
     return render_template("foryou.html")
+
+@app.route("/request")
+def request_page():
+    """Render the foryou.html template."""
+    return render_template("request.html")
 
 
 # ------------------------------
