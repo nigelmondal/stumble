@@ -17,7 +17,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'cs6191$a'
+app.config['MYSQL_PASSWORD'] = 'AppleC30'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -462,7 +462,7 @@ def api_foryou():
     user_id = session["user_id"]
     cursor = mysql.connection.cursor()
     
-    # Exclude current user + those already recorded in buddies
+    # 1) Fetch potential users (exclude current user + those already in 'buddies')
     cursor.execute(
         """
         SELECT user_id, full_name, bio, strengths, weaknesses, 
@@ -479,7 +479,7 @@ def api_foryou():
     )
     users = cursor.fetchall()
 
-    # Fetch current user
+    # 2) Fetch current user's data
     cursor.execute(
         """
         SELECT strengths, weaknesses, learning_style, teaching_style 
@@ -492,102 +492,69 @@ def api_foryou():
     cursor.close()
 
     if not users or not user_data:
-        return jsonify([])
+        return jsonify([])  # Return an empty list if no results
 
-    user_strengths   = user_data.get("strengths", "")
-    user_weaknesses  = user_data.get("weaknesses", "")
-    user_learning    = user_data.get("learning_style", "")
-    user_teaching    = user_data.get("teaching_style", "")
+    # 3) Convert data to a pandas DataFrame for Jaccard-based matching
+    import pandas as pd
+    from sklearn.preprocessing import MultiLabelBinarizer
+    from sklearn.metrics import jaccard_score
 
     df = pd.DataFrame(users)
-    df.fillna("", inplace=True)
+    df.fillna("", inplace=True)  # Replace any None with empty string
 
-    # Current user features
+    # 4) Build combined feature sets
+    # Current user 'features'
+    user_strengths  = user_data.get("strengths", "")
+    user_weaknesses = user_data.get("weaknesses", "")
+    user_learning   = user_data.get("learning_style", "")
+    user_teaching   = user_data.get("teaching_style", "")
+
+    # We'll treat "weaknesses + learning" as "what I'm looking for"
     user_features = user_weaknesses + " " + user_learning
 
-    # Other user combined
+    # For other users, we combine "strengths + teaching" as "what they offer"
     df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
 
-    # Jaccard approach
-    df["combined_features_set"] = df["combined_features"].apply(lambda x: set(x.lower().split()))
+    # Turn them into sets for Jaccard scoring
+    df["combined_features_set"] = df["combined_features"].apply(
+        lambda x: set(x.lower().split())
+    )
     user_features_set = set(user_features.lower().split())
 
+    # 5) MultiLabelBinarizer for Jaccard
     mlb = MultiLabelBinarizer()
     mlb.fit(df["combined_features_set"].tolist() + [user_features_set])
     binary_matrix = mlb.transform(df["combined_features_set"])
     user_vector   = mlb.transform([user_features_set])
 
-    from sklearn.metrics import jaccard_score
+    # 6) Compute Jaccard match_score
     df["match_score"] = [
-        jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))
+        jaccard_score(user_vector[0], binary_matrix[i])
+        for i in range(len(df))
     ]
 
+    # 7) Sort by match_score DESC, take top 10
+    #    Return the fields you want in the final JSON
     recommendations = (
         df.sort_values(by="match_score", ascending=False)
-          .head(10)[["user_id", "full_name", "bio", "match_score"]]
+          .head(10)[
+              [
+                  "user_id",
+                  "full_name",
+                  "bio",
+                  "strengths",
+                  "weaknesses",
+                  "learning_style",
+                  "teaching_style",
+                  "match_score"
+              ]
+          ]
           .to_dict(orient="records")
     )
 
+    # 8) Return as JSON
     return jsonify(recommendations)
 
-# ------------------------------
-# (2.9) BUDDIES (like/dislike + matched)
-# ------------------------------
-@app.route('/api/buddies', methods=['POST'])
-def manage_buddy_relationship():
-    if 'user_id' not in session:
-        return jsonify({"error": "User not logged in"}), 401
-
-    data = request.get_json()
-    user_id = session['user_id']
-    buddy_id = data.get('buddy_id')
-    liked = data.get('liked')
-
-    if buddy_id is None or liked is None:
-        return jsonify({"error": "buddy_id and liked are required"}), 400
-
-    liked = bool(liked)
-
-    cur = mysql.connection.cursor()
-    try:
-        # Insert/update record
-        cur.execute("""
-            INSERT INTO buddies (user_id, buddy_id, liked, matched)
-            VALUES (%s, %s, %s, FALSE)
-            ON DUPLICATE KEY UPDATE 
-                liked = VALUES(liked),
-                matched = matched
-        """, (user_id, buddy_id, liked))
-
-        match_made = False
-
-        # If we just liked them, check if they liked us
-        if liked:
-            cur.execute("""
-                SELECT liked, matched
-                FROM buddies
-                WHERE user_id = %s AND buddy_id = %s
-            """, (buddy_id, user_id))
-            buddy_record = cur.fetchone()
-
-            if buddy_record and buddy_record['liked'] == 1:
-                match_made = True
-                cur.execute("""
-                    UPDATE buddies
-                    SET matched = TRUE
-                    WHERE (user_id = %s AND buddy_id = %s)
-                       OR (user_id = %s AND buddy_id = %s)
-                """, (user_id, buddy_id, buddy_id, user_id))
-
-        mysql.connection.commit()
-        cur.close()
-
-        return jsonify({"status": "success", "match_made": match_made})
-
-    except Exception as e:
-        mysql.connection.rollback()
-        cur.close()
-        return jsonify({"error": str(e)}), 500
 
 # ------------------------------
 # 2.10) CHAT ROUTES
