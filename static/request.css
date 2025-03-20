@@ -27,7 +27,7 @@ html, body {
     margin: 0;
     font-family: 'Numans', serif;
     background-color: #F5F5DC;
-    overflow: hidden;
+    overflow-y: auto;
     height : 100%;
 }
 
@@ -48,7 +48,7 @@ html, body {
     left: 0;
     top: 0;
     bottom: 0;
-    padding-top: 20px;
+    padding-top: 50px;
     
 }
 
@@ -92,14 +92,15 @@ html, body {
     background-color: #F5F5DC;
     padding: 55px;
     flex-grow: 1;
-    margin-top: 20px;
+    margin-top: 10px;
     position : fixed;
     left: 18vw; /* Matches .side-panel */
     top : 0;
     right : 0;
     bottom : 0;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto; /* Enable scrolling */
+    height: 100vh; /* Makes sure it fills the screen */
 }
 .content-wrapper {
     
@@ -109,7 +110,6 @@ html, body {
     gap: 2vw;
     height: calc(100vh - 100px); /* Adjust based on header/footer */
 }
-
 
 .left-section {
     flex : 2;
@@ -147,7 +147,7 @@ html, body {
 }
 
 .main-content h1 {
-    font-size: clamp(20px, 2.5vw, 40px);
+    font-size: clamp(40px, 2.5vw, 40px);
     margin: 0;
     padding: 0;
     display: inline-block;
@@ -276,27 +276,76 @@ html, body {
     border-radius: 100%; /* Optional: Adds rounded corners */
 }
 
-.sidebar-link {
-    position: relative;
+
+
+.request-card {
+    background:rgba(31, 69, 61, 0.4); /* Slightly translucent white */
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.48);
+    color: black;
 }
 
-.info-box {
-    position: absolute;
-    left: 72%;  /* Center the box horizontally */
-    bottom: 120%;  /* Position it right below the link */
-    transform: translateX(-50%); /* Adjust centering */
-    background:rgba(31, 69, 61, 0.69);
+.request-card h2 {
+    font-family: 'Slackey', sans-serif;
+    font-size: 30px;
+    color :rgb(21, 46, 41);
+}
+.request-card p {
+    font size : 20px;
+}
+
+.bubble-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.bubble {
+    background-color: #F5F5DC;
+    color: #1f453d;
+    padding: 5px 12px;
+    font-size: 20px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+/* Accept Button - Green Background */
+.accept-btn {
+    background-color: #1f453d; /* Green */
     color: #F5F5DC;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-    display: none;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1000; /* Ensures it appears above other elements */
+    border: none;
+    padding: 10px 20px;
+    font-size: 25px;
+    border-radius: 10px; /* Rounded edges */
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    margin-right : 100px;
+    margin-top : 30px;
+    font-family: 'Slackey', sans-serif;
 }
 
-.sidebar-link:hover .info-box {
-    display: block;
+.accept-btn:hover {
+    
+    transform: scale(1.1);
 }
 
+/* Reject Button - Red Background */
+.reject-btn {
+    background-color: #1f453d; /* Red */
+    color: #F5F5DC;
+    border: none;
+    padding: 10px 20px;
+    font-size: 25px;
+    border-radius: 10px; /* Rounded edges */
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    font-family: 'Slackey', sans-serif;
+}
+
+.reject-btn:hover {
+ /* Slightly darker red on hover */
+    transform: scale(1.05);
+}

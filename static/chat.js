@@ -1,82 +1,221 @@
-// Dummy chat history for each buddy
-const chatHistory = {
-    Twinkle: [
-        { text: "Hi there!", type: "received" },
-        { text: "Hello, how are you?", type: "sent" },
-        { text: "I'm good! What about you?", type: "received" },
-    ],
-    Niger: [ 
-        { text: "Hey Niger!", type: "sent" },
-        { text: "Hi, long time no see!", type: "received" },
-    ],
-    Ronit: [
-        { text: "Ronit, are you coming to the meeting?", type: "sent" },
-        { text: "Yes, I’ll be there.", type: "received" },
-    ],
-    Shrey: [
-        { text: "How’s it going, Shrey?", type: "sent" },
-        { text: "Pretty good! You?", type: "received" },
-    ],
-};
+$(document).ready(function() {
 
-// Display chat for the selected buddy
-function loadChat(buddyName) {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML = ""; // Clear existing messages
-    document.getElementById("chat-buddy").textContent = buddyName;
+    let currentUserId = $('#buddyList').data('current-user-id');
+    let selectedBuddyId = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let streamRef = null;  // Store stream reference to stop it properly!
 
-    if (chatHistory[buddyName]) {
-        chatHistory[buddyName].forEach((msg) => {
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message", msg.type);
-            messageDiv.textContent = msg.text;
-            chatMessages.appendChild(messageDiv);
+    // Function to load messages
+    function loadMessages(buddyId) {
+        $('#chatMessages').empty();
+        $.ajax({
+            url: `/get_messages/${buddyId}`,
+            type: 'GET',
+            success: function(response) {
+                response.forEach(msg => {
+                    const messageClass = msg.sender_id == currentUserId ? 'sent' : 'received';
+                    let displayMessage = '';
+
+                    if (msg.message.startsWith('File:')) {
+                        const filename = msg.message.replace('File: ', '');
+                        displayMessage = `<a href="/static/uploads/${filename}" target="_blank" download>📎 ${filename}</a>`;
+                    } else if (msg.message.startsWith('Voice:')) {
+                        const filename = msg.message.replace('Voice: ', '');
+                        displayMessage = `<audio controls><source src="/static/uploads/${filename}" type="audio/webm"></audio>`;
+                    } else {
+                        displayMessage = msg.message;
+                    }
+
+                    $('#chatMessages').append(
+                        `<div class="message ${messageClass}">${displayMessage}</div>`
+                    );
+                });
+
+                $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+            },
+            error: function() {
+                alert('Error loading messages!');
+            }
         });
     }
-}
 
-// Handle buddy list click
-document.querySelectorAll(".buddy").forEach((buddy) => {
-    buddy.addEventListener("click", (event) => {
-        document
-            .querySelectorAll(".buddy")
-            .forEach((el) => el.classList.remove("active"));
-        event.target.classList.add("active");
-        loadChat(event.target.dataset.buddy);
+    // Auto-load first buddy chat
+    let firstBuddy = $('.buddy').first();
+    if (firstBuddy.length) {
+        firstBuddy.addClass('active');
+        selectedBuddyId = firstBuddy.data('buddy-id');
+        $('#chat-buddy').text(firstBuddy.text());
+        loadMessages(selectedBuddyId);
+    }
+
+    // When buddy clicked
+    $('.buddy').click(function(e) {
+        e.preventDefault();
+        $('.buddy').removeClass('active');
+        $(this).addClass('active');
+        selectedBuddyId = $(this).data('buddy-id');
+        $('#chat-buddy').text($(this).text());
+        loadMessages(selectedBuddyId);
     });
+
+    // Send Text Message
+    $('#sendButton').click(function() {
+        const message = $('#messageInput').val().trim();
+        if (message === "" || !selectedBuddyId) return;
+
+        $.ajax({
+            url: '/send_message',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                receiver_id: selectedBuddyId,
+                message: message
+            }),
+            success: function(response) {
+                if (response.status === 'Message sent') {
+                    $('#chatMessages').append(
+                        `<div class="message sent">${message}</div>`
+                    );
+                    $('#messageInput').val('');
+                    $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                } else {
+                    alert('Failed to send message.');
+                }
+            },
+            error: function() {
+                alert('Error sending message!');
+            }
+        });
+    });
+
+    // File attachment
+    $('#attachButton').click(function() {
+        $('#fileInput').click();
+    });
+
+    $('#fileInput').change(function() {
+        const file = this.files[0];
+        if (file && selectedBuddyId) {
+            const formData = new FormData();
+            formData.append('receiver_id', selectedBuddyId);
+            formData.append('file', file);
+
+            $.ajax({
+                url: '/send_file',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'File sent') {
+                        $('#chatMessages').append(
+                            `<div class="message sent"><a href="/static/uploads/${response.filename}" target="_blank" download>📎 ${file.name}</a></div>`
+                        );
+                        $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                    } else {
+                        alert('Failed to send file.');
+                    }
+                },
+                error: function() {
+                    alert('Error sending file!');
+                }
+            });
+        }
+    });
+
+    // ======================
+
+    // 🎤 RECORD BUTTON
+    // 🎤 RECORD BUTTON
+    $('#recordButton').click(function() {
+        console.log("🎤 Mic button clicked!");
+        $('#statusText').text("Recording...").show();  // <-- Visual Feedback
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                streamRef = stream;
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.start();
+                console.log("🎙️ Recording started!");
+
+                mediaRecorder.ondataavailable = e => {
+                    audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    console.log("🛑 Recording stopped.");
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    $('#audioPlayer').attr('src', audioUrl).show();
+                    $('#sendRecordButton').show();
+                    $('#statusText').hide();
+
+                    // Stop mic
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                // Update UI
+                $('#recordButton').hide();
+                $('#stopRecordButton').show();
+                $('#sendRecordButton').hide();
+            })
+            .catch(err => {
+                console.error("❌ Microphone error:", err);
+                alert('Microphone permission denied or error! Please check browser permissions.');
+                $('#statusText').hide();
+            });
+    });
+
+    
+    // ⏹️ STOP BUTTON
+    $('#stopRecordButton').click(function() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            $('#stopRecordButton').hide();
+        }
+    });
+
+    // ✅ SEND BUTTON
+    $('#sendRecordButton').click(function() {
+        if (audioChunks.length === 0 || !selectedBuddyId) {
+            alert('No audio recorded or no buddy selected!');
+            return;
+        }
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('receiver_id', selectedBuddyId);
+        formData.append('audio', audioBlob, 'voice_message.webm');
+
+        $.ajax({
+            url: '/send_voice',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert('Voice message sent!');
+                $('#recordButton').show();
+                $('#sendRecordButton').hide();
+                $('#audioPlayer').hide();
+                audioChunks = [];
+
+                if (response.filename) {
+                    $('#chatMessages').append(
+                        `<div class="message sent"><audio controls><source src="/static/uploads/${response.filename}" type="audio/webm"></audio></div>`
+                    );
+                    $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                }
+            },
+            error: function() {
+                alert('Error sending voice!');
+            }
+        });
+    });
+
+
+
+
 });
-
-// Handle send button click
-document.getElementById("send-btn").addEventListener("click", () => {
-    const messageInput = document.getElementById("message");
-    const messageText = messageInput.value.trim();
-
-    if (messageText !== "") {
-        const chatMessages = document.getElementById("chat-messages");
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", "sent");
-        messageDiv.textContent = messageText;
-        chatMessages.appendChild(messageDiv);
-        messageInput.value = "";
-    }
-});
-
-// Handle attachment button click
-document.getElementById("attach-btn").addEventListener("click", () => {
-    document.getElementById("file-input").click();
-});
-
-// Handle file input change
-document.getElementById("file-input").addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const chatMessages = document.getElementById("chat-messages");
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", "attachment", "sent");
-        messageDiv.textContent = `📎 ${file.name}`;
-        chatMessages.appendChild(messageDiv);
-    }
-});
-
-// Initial load for Twinkle
-loadChat("Twinkle");

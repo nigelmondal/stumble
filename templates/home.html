@@ -23,9 +23,9 @@
             background-color: rgba(0, 0, 0, 0.5);
         }
         .modal-content {
-            background-color: #fefefe;
+            background-color: #F5F5DC;
             margin: 10% auto; 
-            padding: 20px;
+            padding: 10px;
             width: 50%;
             max-width: 400px;
             border-radius: 10px;
@@ -53,7 +53,7 @@
             margin-top: 10px;
             padding: 8px 16px;
             background: #1f453d;
-            color: #fff;
+            color: #F5F5DC;
             border: none;
             cursor: pointer;
             border-radius: 5px;
@@ -78,11 +78,12 @@
         /* Optional styling for bubble-like items */
         .bubbles .bubble {
             display: inline-block;
-            background: #eae8d5;
-            color: #1f453d;
-            padding: 5px 10px;
+            background: #1f453d;
+            color: #F5F5DC;
+            padding: 10px 11px;
             border-radius: 15px;
-            margin: 5px;
+            margin: 2px;
+            font-size: larger;
         }
 
         .suggestion-box {
@@ -115,11 +116,11 @@
         <center><h1>stumbl</h1></center>
 
         <!-- Use url_for to match Flask route functions -->
-        <a href="{{ url_for('foryou_page') }}">explore</a>
-        <a href="{{ url_for('requests_page') }}">requests</a>
-        <a href="{{ url_for('chat') }}">your buddies</a>
-        <a href="{{ url_for('calendar') }}">calendar</a>
-        <a href="{{ url_for('home') }}">profile</a>
+        <a href="{{ url_for('foryou_page') }}" class = "sidebar-link">explore<div class = "info-box">find people to <br>pair up with</div></a>
+        <a href="{{ url_for('requests_page') }}" class = "sidebar-link">request<div class = "info-box">see who has liked you</div></a>
+        <a href="{{ url_for('chat') }}" class = "sidebar-link">chat<div class = "info-box">connect with <br>your matches</div></a>
+        <a href="{{ url_for('calendar') }}" class = "sidebar-link">calendar<div class = "info-box">schedule your study <br>sessions</div></a>
+        <a href="{{ url_for('home') }}"class = "sidebar-link">your profile<div class = "info-box">go back to <br> your profile</div></a>
         <br>
        </div>
        <div class="sidebar-footer">
@@ -138,7 +139,7 @@
         <div class="user-info">
             <h1>Welcome, {{ user['full_name'] }}!</h1>
             <!-- Example placeholder for age; or remove if you store it differently -->
-            <span>Age: 25</span> 
+            <span>Age: {{user.age}}</span> 
         </div>
         <hr>
         

@@ -6,6 +6,11 @@ import MySQLdb.cursors
 import pandas as pd
 from sklearn.metrics import jaccard_score
 from sklearn.preprocessing import MultiLabelBinarizer
+import sqlite3
+from werkzeug.utils import secure_filename
+import os
+import uuid
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = 'YOUR_SECRET_KEY_HERE'
@@ -19,6 +24,72 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # Base directory of project
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Optional: Automatically create folder if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+@app.route('/send_file', methods=['POST'])
+def send_file():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    receiver_id = request.form['receiver_id']
+    file = request.files['file']
+
+    if file:
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(save_path)
+
+        # Save file message in DB
+        cur = mysql.connection.cursor()
+        cur.execute('''
+            INSERT INTO chats (sender_id, receiver_id, message, sent_at)
+            VALUES (%s, %s, %s, NOW())
+        ''', (session['user_id'], receiver_id, f'File: {filename}'))
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({'status': 'File sent', 'filename': filename})
+    else:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+@app.route('/send_voice', methods=['POST'])
+def send_voice():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    sender_id = session['user_id']  # ✅ ADD THIS LINE HERE!!
+    receiver_id = request.form['receiver_id']
+    voice = request.files['audio']
+
+    if voice:
+        # Generate unique filename
+        unique_id = uuid.uuid4().hex
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        filename = f'voice_{timestamp}_{unique_id}.webm'
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        voice.save(save_path)
+
+        # Insert voice message into the correct table (chats table!)
+        cur = mysql.connection.cursor()
+        cur.execute('''
+            INSERT INTO chats (sender_id, receiver_id, message, sent_at)
+            VALUES (%s, %s, %s, NOW())
+        ''', (sender_id, receiver_id, f'Voice: {filename}'))
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({'filename': filename})
+
+    return jsonify({'error': 'No voice message recorded!'}), 400
+
 
 @app.route('/')
 def root():
@@ -164,7 +235,7 @@ def home():
 
     user_id = session['user_id']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+    cur.execute("SELECT *, age FROM user WHERE user_id = %s", (user_id,))
     user = cur.fetchone()
     cur.close()
 
@@ -520,80 +591,77 @@ def manage_buddy_relationship():
         return jsonify({"error": str(e)}), 500
 
 # ------------------------------
-# (2.10) CHAT ROUTES
+# 2.10) CHAT ROUTES
 # ------------------------------
 @app.route('/chat')
 def chat():
-    """
-    Render the chat page with the list of matched buddies.
-    """
     if 'user_id' not in session:
-        flash('Please log in first.', 'warning')
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    cursor = mysql.connection.cursor()
-    
-    # Fetch all buddies (matched=TRUE) for this user
-    cursor.execute("""
-        SELECT b.buddy_id, u.full_name
+
+    cur = mysql.connection.cursor()
+
+    # Fetch matched buddies dynamically
+    cur.execute('''
+        SELECT u.user_id, u.full_name
         FROM buddies b
-        JOIN user u ON b.buddy_id = u.user_id
-        WHERE b.user_id = %s
-          AND b.matched = 1
-    """, (user_id,))
-    buddies = cursor.fetchall()
-    cursor.close()
+        JOIN user u ON u.user_id = b.buddy_id
+        WHERE b.user_id = %s AND b.matched = 1
+    ''', (user_id,))
+    buddies = cur.fetchall()
+
+    cur.close()
 
     return render_template('chat.html', buddies=buddies)
+
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
     if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+        return jsonify({'error': 'Not logged in'}), 401
 
-    data = request.json
     sender_id = session['user_id']
-    receiver_id = data.get('receiver_id')
-    message = data.get('message')
+    data = request.get_json()
+    receiver_id = data['receiver_id']
+    message = data['message']
 
-    if not receiver_id or not message:
-        return jsonify({'error': 'Receiver ID and message are required'}), 400
-
+    cur = mysql.connection.cursor()
     try:
-        cursor = mysql.connection.cursor()
-        cursor.execute("""
-            INSERT INTO chats (sender_id, receiver_id, message) 
-            VALUES (%s, %s, %s)
-        """, (sender_id, receiver_id, message))
+        cur.execute('''
+            INSERT INTO chats (sender_id, receiver_id, message, sent_at)
+            VALUES (%s, %s, %s, NOW())
+        ''', (sender_id, receiver_id, message))
         mysql.connection.commit()
-        cursor.close()
-        return jsonify({'success': 'Message sent successfully'})
     except Exception as e:
+        mysql.connection.rollback()
+        cur.close()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/get_messages/<int:buddy_id>', methods=['GET'])
-def get_messages(buddy_id):
-    """
-    Get all messages between the logged-in user and the buddy_id, in ascending time.
-    """
+    cur.close()
+    return jsonify({'status': 'Message sent'})
+
+
+@app.route('/get_messages/<int:receiver_id>', methods=['GET'])
+def get_messages(receiver_id):
     if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+        return jsonify({'error': 'Not logged in'}), 401
 
     user_id = session['user_id']
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        """
-        SELECT sender_id, receiver_id, message, sent_at 
+
+    cur = mysql.connection.cursor()
+    # Fetch all messages exchanged between sender and receiver (both directions)
+    cur.execute('''
+        SELECT sender_id, receiver_id, message, sent_at
         FROM chats
-        WHERE (sender_id = %s AND receiver_id = %s) 
+        WHERE (sender_id = %s AND receiver_id = %s)
            OR (sender_id = %s AND receiver_id = %s)
-        ORDER BY sent_at ASC
-        """,
-        (user_id, buddy_id, buddy_id, user_id)
-    )
-    messages = cursor.fetchall()
-    cursor.close()
+        ORDER BY sent_at
+    ''', (user_id, receiver_id, receiver_id, user_id))
+    
+    messages = cur.fetchall()
+    cur.close()
+
     return jsonify(messages)
 
 # ------------------------------
@@ -718,7 +786,7 @@ def requests_page():
     user_id = session['user_id']
     cur = mysql.connection.cursor()
     cur.execute("""
-        SELECT b.user_id AS liker_id, u.full_name, u.bio
+        SELECT b.user_id AS liker_id, u.full_name, u.bio, u.strengths, u.weaknesses
         FROM buddies b
         JOIN user u ON b.user_id = u.user_id
         WHERE b.buddy_id = %s

@@ -1,90 +1,77 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Chat Page - Stumbl</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='/chat_style.css') }}">
-    <script src="{{ url_for('static', filename='/chat.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat_style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
-    
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
 
     <div class="side-panel" id="sidebar">
-        <div class = "sidebar-content">
-         <br><br>
-         <center><h1>stumbl</h1></center>
-         <a href="foryou">explore</a>
-         <a href="chat">your buddies</a>
-         <a href="calendar">calendar</a>
-         <a href="home">profile</a><BR>
-         </div>
-             <div class="sidebar-footer">
-                 <center><a href="{{ url_for('logout') }}"><button class="logout-btn">Logout</button></a></center>
-               </div>
-                 
-             
-     </div>
-     
+        <div class="sidebar-content">
+            <h1>stumbl</h1>
+            <a href="{{ url_for('foryou_page') }}">explore</a>
+            <a href="{{ url_for('requests_page') }}">requests</a>
+            <a href="{{ url_for('chat') }}">your buddies</a>
+            <a href="{{ url_for('calendar') }}">calendar</a>
+            <a href="{{ url_for('home') }}">profile</a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}">
+                <button class="logout-btn">Logout</button>
+            </a>
+        </div>
+    </div>
 
     <div class="main-content">
 
-        <div class="friends-list">
-
+        <!-- Buddy List -->
+        <div id="buddyList" data-current-user-id="{{ session['user_id'] }}" class="friends-list">
             <h2>Your Buddies</h2>
-
             <div class="buddy-list">
-
-                <a href="#" class="buddy active" data-buddy="Twinkle">Twinkle</a>
-
-                <a href="#" class="buddy" data-buddy="Niger">Nigel</a>
-
-                <a href="#" class="buddy" data-buddy="Ronit">Ronit</a>
-
-                <a href="#" class="buddy" data-buddy="Shrey">Shrey</a>
-
+                {% for buddy in buddies %}
+                    <a href="#" class="buddy {% if loop.first %}active{% endif %}" data-buddy-id="{{ buddy.user_id }}">{{ buddy.full_name }}</a><br>
+                {% endfor %}
             </div>
-
         </div>
 
+        <!-- Chat Window -->
         <div class="chat-area">
-
             <div class="chat-header">
-
-                <h1 id="chat-buddy">Twinkle</h1>
-
+                <h1 id="chat-buddy">Select Buddy</h1>
             </div>
 
-            <div class="chat-messages" id="chat-messages">
-
-                <!-- Chat messages will be loaded here -->
-
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will load here -->
             </div>
 
             <div class="chat-input">
+                <input type="file" id="fileInput" style="display: none;" />
+                <button id="attachButton">📎</button>
+            
+                <button id="recordButton">🎤</button>
+                <button id="stopRecordButton" style="display:none;">⏹️</button>
+                <button id="sendRecordButton" style="display:none;">✅</button>
+                <p id="statusText" style="display:none; color: red;">Recording...</p>
 
-                <input type="text" id="message" placeholder="Type a message...">
-
-                <input type="file" id="file-input" style="display: none;">
-
-                <button id="attach-btn">📎</button>
-
-                <button id="send-btn">Send</button>
-
+                <audio id="audioPlayer" controls style="display:none;"></audio>
+            
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button id="sendButton">Send</button>
             </div>
 
         </div>
 
     </div>
+    
+    <!-- Chat JS -->
+    <script src="{{ url_for('static', filename='/chat.js') }}"></script>
 
 </body>
 

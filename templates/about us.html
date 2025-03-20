@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Stumbl</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        
+        @font-face {
+            font-family: 'Slackey';
+            src: url('Slackey-Regular.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Numans';
+            src: url("SpecialElite-Regular.ttf") format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Slackey';
+            src: url('Slackey-Regular.ttf') format('truetype');
+        }
+
+        @keyframes tilt {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    20% { transform: translateX(-50%) rotate(-5deg); }
+    40% { transform: translateX(-50%) rotate(5deg); }
+    60% { transform: translateX(-50%) rotate(-10deg); }
+    80% { transform: translateX(-50%) rotate(10deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
+}
+
+.fixed-title:hover {
+    animation: tilt 1.5s ease-in-out;
+}
+
+/* Fixed title (appears after animation) */
+.fixed-title {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 250px;
+    font-family: 'Slackey', serif;
+    color: #F5F5DC;
+    opacity: 1;
+    font-weight: 100;
+    margin-top: 0px;
+    margin-bottom: 35px;
+}
+
+    
+
+
+        body {
+            font-family: 'Special Elite', cursive;
+            margin: 0;
+            padding: 0;
+            background-color: #F5F5DC; /* Beige */
+            color:  #1f453d; /* Deep green */
+        }
+
+        /* Smooth Transitions */
+        * {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: transparent; /* Fully transparent */
+            padding: 15px 50px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: flex-end; /* Aligns items to the right */
+            align-items: center;
+            z-index: 1000;
+            font-family: 'Special Elite', cursive;
+        }
+
+        /* Link inside Navbar */
+        .navbar a {
+            font-size: 20px; /* Increased font size */
+            text-decoration: none;
+            font-family: 'Special Elite', cursive;
+            color: #9e0018; /* Change link color (Beige) */
+            transition: color 0.3s ease-in-out;
+            margin-right : 70px;  
+            margin-top : 10px;          
+        }
+
+        /* Change link color on hover */
+        .navbar a:hover {
+            color: #ffcc00; /* Change color on hover (Gold) */
+        }
+
+        /* Button Style */
+        .navbar button {
+            background-color: #1f453d6d; /* Beige with slight transparency */
+            color: #f5f5dc; /* Beige text */
+            border: 2px solid #f5f5dc; /* Border matching text */
+            padding: 10px 20px;
+            font-size: 20px;
+            font-family: 'Special Elite', cursive;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            margin-right : 40px;
+        }
+
+        /* Change button background on hover */
+        .navbar button:hover {
+            background-color: #f5f5dc; /* Solid beige on hover */
+            color: #1f453d; /* Deep green text */
+        }
+
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            background: linear-gradient(to right, rgba(31, 69, 61, 0.9), rgba(31, 69, 61, 0.7)),
+                        url("../static/images/image reg.jpg") center/cover no-repeat;
+            text-align: center;
+            padding: 50px;          
+        }
+
+
+        .xyz {
+            color: #F5F5DC;
+            font-family: 'Special Elite', cursive;
+            font-size: 30px;
+            overflow: hidden; /* Hides overflowing text */
+            white-space: nowrap; /* Prevents text wrapping */
+            border-right: 3px solid #F5F5DC; /* Simulates cursor */
+            width: 0; /* Starts with no visible text */
+            display: inline-block; /* Needed for width transition */
+            animation: typing 3s steps(30, end) forwards, blink 0.7s infinite;
+        }
+
+        /* Typewriter Animation */
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        /* Blinking Cursor Animation */
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
+        }
+
+
+        /* About Section */
+        .about-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .about-text {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .about-text h3 {
+            font-size: 28px;
+            color: #1f453d;
+            margin-bottom: 10px;
+        }
+
+        .about-text p {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .about-image {
+            flex: 1;
+            text-align: center;
+        }
+
+        .about-image img {
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Section */
+        .features {
+            background-color: #e0e0c8;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .features h3 {
+            font-size: 28px;
+            color: #1f453d;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .feature-item {
+            flex: 1;
+            min-width: 250px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Creators Section */
+        .creators {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .creators h3 {
+            font-size: 28px;
+            color: #1f453d;
+            margin-bottom: 20px;
+        }
+
+        .creator-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .creator-item {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .creator-item img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .creator-item p {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #1f453d;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1f453d;
+            color: #f5f5dc;
+            text-align: center;
+            padding: 15px;
+            margin-top: 50px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .about-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href = "#"> Go to the website</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero"><center>
+        
+        
+        <div class="fixed-title">stumbl</div>
+            <div class = "xyz">Empowering Students Through Collaboration</div><br>
+            </div></center>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="about-container">
+        <div class="about-text">
+            <h3>HIIIIIIIIIIIIII</h3>
+            <p>Collaboration and peer support play a vital role in academic success, yet students often struggle to find accessible assistance or interdisciplinary opportunities. Stumbl bridges this gap with a platform that fosters meaningful academic connections.</p>
+        </div>
+        <div class="about-image">
+            <img src="https://source.unsplash.com/400x300/?team,collaboration" alt="Team Collaboration">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h3>Key Features</h3>
+        <div class="feature-list">
+            <div class="feature-item">
+                <h4>📌 Personalized Profiles</h4>
+                <p>Showcase your academic interests, skills, and collaboration preferences.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔍 Smart Matchmaking</h4>
+                <p>Connect with peers based on your academic needs and expertise.</p>
+            </div>
+            <div class="feature-item">
+                <h4>💬 Centralized Communication</h4>
+                <p>Chat, share resources, and plan projects all in one place.</p>
+            </div>
+            <div class="feature-item">
+                <h4>📅 Integrated Calendar</h4>
+                <p>Stay organized with scheduling tools for collaboration and deadlines.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creators Section -->
+    <section class="creators">
+        <h3>Meet the Creators</h3>
+        <div class="creator-list">
+            <div class="creator-item">
+                <img src="creator1.jpg" alt="Creator 1">
+                <p>John Doe - Co-Founder & Lead Developer</p>
+            </div>
+            <div class="creator-item">
+                <img src="creator2.jpg" alt="Creator 2">
+                <p>Jane Smith - Co-Founder & UX Designer</p>
+            </div>
+            <div class="creator-item">
+                <img src="creator3.jpg" alt="Creator 3">
+                <p>Michael Lee - Backend Developer</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Stumbl. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Stumble - Requests</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='request.css') }}">
 </head>
 <body>
 
@@ -26,25 +26,41 @@
 </div>
 
 <div class="main-content">
-  <h1>Pending Requests</h1>
-  <p>These are the users who liked you. Accept to match or reject to dismiss.</p>
+  <h1>Pending Requests</h1><br><br>
+  <h2>These are the users who liked you. Accept to match or reject to dismiss.</h2>
   
   <div id="requestsContainer">
     {% if requests %}
       {% for r in requests %}
+
         <div class="request-card">
           <h2>{{ r.full_name }}</h2>
           <p>{{ r.bio }}</p>
-          <button 
+          <h3> Strengths :</h3> 
+          <div class="bubble-container">
+            {% for strength in r.strengths.split(",") %}
+                <span class="bubble">{{ strength.strip() }}</span>
+            {% endfor %}
+        </div>
+        <h3> Weaknesses :</h3> 
+        <div class="bubble-container">
+            {% for weakness in r.weaknesses.split(",") %}
+                <span class="bubble" >{{ weakness.strip() }}</span>
+            {% endfor %}
+        </div>
+    
+          <center>
+          <button
             class="accept-btn" 
             onclick="respondToRequest({{ r.liker_id }}, true)">
             Accept
           </button>
-          <button 
+          <button
             class="reject-btn" 
             onclick="respondToRequest({{ r.liker_id }}, false)">
             Reject
           </button>
+        </center>
         </div>
       {% endfor %}
     {% else %}

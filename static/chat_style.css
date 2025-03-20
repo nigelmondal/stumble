@@ -21,14 +21,13 @@
     animation: tilt 1.5s ease-in-out;
 }
 
-
 html, body {
     display: flex;
     margin: 0;
     font-family: 'Numans', serif;
     background-color: #F5F5DC;
     overflow: hidden;
-    height : 100%;
+    height: 100%;
 }
 
 /* Side panel styling */
@@ -36,9 +35,9 @@ html, body {
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Pushes content up, footer stays at the bottom */
-    width: 17vw; /* Adjusts width based on viewport */
-    min-width: 185px; /* Prevents it from becoming too small */
-    max-width: 305px; /* Prevents excessive growth */
+    width: 14.5vw; /* Adjusts width based on viewport */
+    min-width: 150px; /* Prevents it from becoming too small */
+    max-width: 250x; /* Prevents excessive growth */
     height: 100vh; 
     overflow: hidden;
     background-color: #1f453d;
@@ -48,22 +47,14 @@ html, body {
     left: 0;
     top: 0;
     bottom: 0;
-    flex-direction: column;
-    justify-content: space-between;
-    
 }
 
-
-
 .side-panel h1 {
-    margin-top: 0;
+    margin-top: 30px;
     font-size: clamp(30px, 4vw, 60px);
     font-family: 'Slackey', sans-serif;
     color :#F5F5DC;
-    
 }
-
-
 
 .side-panel a {
     display: block;
@@ -76,27 +67,33 @@ html, body {
 }
 
 .side-panel a:hover {
-   
     font-size: 26px;
     transform: scale(1.1);
     transition: transform 0.5s ease;
-    color:#1f453d;
+    color: #1f453d;
     background: #F5F5DC;
     cursor: pointer;
     margin-bottom: 22px; 
     border: none;
-    
 }
 
-/* Main content styling */
-.main-content {
-    display: flex;
-    margin-left: 17vw;
-    width: calc(100vw - 17vw);
-    height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
+
+/* Logout button fix */
+.logout-btn {
+    background: #F5F5DC; 
+    color: #1f453d; 
+    border: none; 
+    
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 40px;
+    font-size: 25px;
+    font-family: 'Slackey', sans-serif;
 }
+
+/* SIDE PANEL DONE -------------------------------*/
+
+
 .content-wrapper {
     
     margin-top: 20px;
@@ -106,6 +103,26 @@ html, body {
     height: calc(100vh - 100px); /* Adjust based on header/footer */
 }
 
+.sidebar-content {
+    flex-grow: 1; /* Pushes footer to bottom */
+    
+  }
+  
+.sidebar-footer {
+    padding: 10px 0 50px;
+    text-align: center;
+}
+
+/* Main content area */
+.main-content {
+    display: flex;
+    margin-left: 12vw;
+    width: calc(100vw - 12vw);
+    height: 100vh;
+    padding: 40px;
+    padding-left: 100px;
+    box-sizing: border-box;
+}
 
 .friends-list {
     width: 25%;
@@ -114,48 +131,7 @@ html, body {
     box-sizing: border-box;
     border-right: 2px solid #1f453d;
     overflow-y: auto;
-
 }
-
-
-
-.friends-list h2 {
-
-    font-size: 25px;
-
-    color: #1f453d;
-
-    margin-bottom: 10px;
-
-    font-family: 'Slackey', sans-serif;
-
-}
-
-
-
-.buddy-list a {
-
-    display: block;
-
-    color: #1f453d;
-
-    text-decoration: none;
-
-    font-size: 20px;
-
-    margin: 5px 0;
-
-}
-
-
-
-.buddy-list a:hover {
-
-    text-decoration: underline;
-
-}
-
-
 
 .chat-area {
     flex-grow: 1;
@@ -166,86 +142,41 @@ html, body {
     box-sizing: border-box;
     height: 100%;
     color: white;
-
 }
-
-
-
-.chat-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 10px;
-
-}
-
-
 
 .chat-header h1 {
-
     font-size: 22px;
-
     color: #F5F5DC;
-
     font-family: 'Slackey', sans-serif;
-
-    padding-top: 15px;
-
 }
 
-
-
 .chat-messages {
-
     flex-grow: 1;
     overflow-y: auto;
     background: #F5F5DC;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #1f453d;
-
 }
-
-
 
 .message {
-
     margin: 5px 0;
-
     padding: 8px 10px;
-
     border-radius: 8px;
-
     max-width: 70%;
-
-    font-size: 14px;
-
+    font-size: 18px;
 }
 
-
-
 .message.received {
-
     background-color: #1f453d48;
-
     align-self: flex-start;
 
 }
 
-
-
 .message.sent {
-
     background-color: #1f453d;
-
     color: #F5F5DC;
-
     align-self: flex-end;
-
 }
 
 .chat-input {
@@ -271,56 +202,38 @@ html, body {
     cursor: pointer;
 }
 
-
 .chat-input button:hover {
     background-color: #ddd;
 }
 
+/* Responsive Fix for smaller screens */
+@media (max-width: 768px) {
+    .side-panel {
+        width: 35vw; /* Larger width for mobile usability */
+    }
 
-.logout-btn {
-    background: #F5F5DC; 
-    color: #1f453d; 
-    border: none; 
-    
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 0;
-    font-size: 25px;
-    font-family: 'Slackey', sans-serif;
-    
+    .main-content {
+        margin-left: 35vw; /* Adjusts main content for mobile */
+        width: calc(100vw - 35vw);
+    }
 }
 
-
-.sidebar-content {
-    flex-grow: 1; /* Pushes footer to bottom */
-    
-  }
-  
-  .sidebar-footer {
-    padding: 10px 0 50px;
-    text-align: center;
-  }
-
-  * {
-    max-width: 100%;
-    box-sizing: border-box;
+.chat-messages a:link {
+    color: #F5F5DC; /* Change this to your desired color */
 }
 
-
-.section-header button {
-    font-size: 30px; /* Increase emoji size */
-    background: none; /* Remove default background */
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 100%;
-    color: #1f453d;
-    transition: background 0.3s ease, color 0.3s ease; /* Smooth transitions */
+/* Visited link color inside chat messages */
+.chat-messages a:visited {
+    color: #F5F5DC; /* Change this to your desired color */
 }
 
-/* Hover effect */
-.section-header button:hover {
-    background: #1f453d;
-    color: #F5F5DC;
-    border-radius: 100%; /* Optional: Adds rounded corners */
+/* Active (clicked) link color inside chat messages */
+.chat-messages a:active {
+    color: #FF4500; /* Change this to your desired color */
+}
+
+/* Hover effect for links inside chat messages */
+.chat-messages a:hover {
+    color:rgb(158, 158, 145); /* Change this to your desired color */
+    text-decoration: underline;
 }
