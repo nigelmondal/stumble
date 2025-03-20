@@ -10,7 +10,6 @@ import sqlite3
 from werkzeug.utils import secure_filename
 import os
 import uuid
-from datetime import date
 
 app = Flask(__name__)
 app.secret_key = 'YOUR_SECRET_KEY_HERE'
