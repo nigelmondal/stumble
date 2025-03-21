@@ -17,7 +17,7 @@ app.secret_key = 'YOUR_SECRET_KEY_HERE'
 # Configure MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'AppleC30'
+app.config['MYSQL_PASSWORD'] = 'cs6191$a'
 app.config['MYSQL_DB'] = 'stumble'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -462,7 +462,7 @@ def api_foryou():
     user_id = session["user_id"]
     cursor = mysql.connection.cursor()
     
-    # 1) Fetch potential users (exclude current user + those already in 'buddies')
+    # Exclude current user + those already recorded in buddies
     cursor.execute(
         """
         SELECT user_id, full_name, bio, strengths, weaknesses, 
@@ -477,6 +477,171 @@ def api_foryou():
         """,
         (user_id, user_id)
     )
+    users = cursor.fetchall()
+
+    # Fetch current user
+    cursor.execute(
+        """
+        SELECT strengths, weaknesses, learning_style, teaching_style 
+        FROM user 
+        WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    user_data = cursor.fetchone()
+    cursor.close()
+
+    if not users or not user_data:
+        return jsonify([])
+
+    user_strengths   = user_data.get("strengths", "")
+    user_weaknesses  = user_data.get("weaknesses", "")
+    user_learning    = user_data.get("learning_style", "")
+    user_teaching    = user_data.get("teaching_style", "")
+
+    df = pd.DataFrame(users)
+    df.fillna("", inplace=True)
+
+    # Current user features
+    user_features = user_weaknesses + " " + user_learning
+
+    # Other user combined
+    df["combined_features"] = df["strengths"] + " " + df["teaching_style"]
+
+    # Jaccard approach
+    df["combined_features_set"] = df["combined_features"].apply(lambda x: set(x.lower().split()))
+    user_features_set = set(user_features.lower().split())
+
+    mlb = MultiLabelBinarizer()
+    mlb.fit(df["combined_features_set"].tolist() + [user_features_set])
+    binary_matrix = mlb.transform(df["combined_features_set"])
+    user_vector   = mlb.transform([user_features_set])
+
+    from sklearn.metrics import jaccard_score
+    df["match_score"] = [
+        jaccard_score(user_vector[0], binary_matrix[i]) for i in range(len(df))
+    ]
+
+    recommendations = (
+        df.sort_values(by="match_score", ascending=False)
+          .head(10)[["user_id", "full_name", "bio", "match_score"]]
+          .to_dict(orient="records")
+    )
+
+    return jsonify(recommendations)
+@app.route("/api/foryou")
+def api_foryou2():
+    if "user_id" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user_id"]
+    cursor = mysql.connection.cursor()
+    
+    # Fetching potential users
+    cursor.execute(
+        """
+        SELECT user_id, full_name, bio, strengths, weaknesses,
+               learning_style, teaching_style
+        FROM user
+        WHERE user_id != %s
+          AND user_id NOT IN (
+              SELECT buddy_id 
+              FROM buddies 
+              WHERE user_id = %s
+          )
+        """,
+        (user_id, user_id)
+    )
+    users = cursor.fetchall()
+
+    # Fetch current user
+    cursor.execute(
+        """
+        SELECT strengths, weaknesses, learning_style, teaching_style 
+        FROM user 
+        WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    user_data = cursor.fetchone()
+    cursor.close()
+
+    if not users or not user_data:
+        return jsonify([])
+
+    # ... (Your Jaccard matching logic here) ...
+    # when creating the 'recommendations' dict, include strengths & weaknesses:
+
+    recommendations = (
+        df.sort_values(by="match_score", ascending=False)
+          .head(10)[["user_id", "full_name", "bio",
+                     "strengths", "weaknesses",   # <--- ADD HERE
+                     "learning_style",            # optional
+                     "teaching_style",            # optional
+                     "match_score"]]
+          .to_dict(orient="records")
+    )
+
+    return jsonify(recommendations)
+
+# ------------------------------
+# (2.9) BUDDIES (like/dislike + matched)
+# ------------------------------
+@app.route('/api/buddies', methods=['POST'])
+def manage_buddy_relationship():
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.get_json()
+    user_id = session['user_id']
+    buddy_id = data.get('buddy_id')
+    liked = data.get('liked')
+
+    if buddy_id is None or liked is None:
+        return jsonify({"error": "buddy_id and liked are required"}), 400
+
+    liked = bool(liked)
+
+    cur = mysql.connection.cursor()
+    try:
+        # Insert/update record
+        cur.execute("""
+            INSERT INTO buddies (user_id, buddy_id, liked, matched)
+            VALUES (%s, %s, %s, FALSE)
+            ON DUPLICATE KEY UPDATE 
+                liked = VALUES(liked),
+                matched = matched
+        """, (user_id, buddy_id, liked))
+
+        match_made = False
+
+        # If we just liked them, check if they liked us
+        if liked:
+            cur.execute("""
+                SELECT liked, matched
+                FROM buddies
+                WHERE user_id = %s AND buddy_id = %s
+            """, (buddy_id, user_id))
+            buddy_record = cur.fetchone()
+
+            if buddy_record and buddy_record['liked'] == 1:
+                match_made = True
+                cur.execute("""
+                    UPDATE buddies
+                    SET matched = TRUE
+                    WHERE (user_id = %s AND buddy_id = %s)
+                       OR (user_id = %s AND buddy_id = %s)
+                """, (user_id, buddy_id, buddy_id, user_id))
+
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({"status": "success", "match_made": match_made})
+
+    except Exception as e:
+        mysql.connection.rollback()
+        cur.close()
+        return jsonify({"error": str(e)}), 500
     users = cursor.fetchall()
 
     # 2) Fetch current user's data
@@ -765,6 +930,9 @@ def requests_page():
     return render_template('requests.html', requests=pending_requests)
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/api/requests', methods=['POST'])
 def handle_requests():

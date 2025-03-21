@@ -85,7 +85,7 @@
             font-size: 20px; /* Increased font size */
             text-decoration: none;
             font-family: 'Special Elite', cursive;
-            color: #9e0018; /* Change link color (Beige) */
+            color:  #ffcc00; /* Change link color (Beige) */
             transition: color 0.3s ease-in-out;
             margin-right : 70px;  
             margin-top : 10px;          
@@ -93,7 +93,7 @@
 
         /* Change link color on hover */
         .navbar a:hover {
-            color: #ffcc00; /* Change color on hover (Gold) */
+            color: #9e0018; /* Change color on hover (Gold) */
         }
 
         /* Button Style */
@@ -121,8 +121,7 @@
             align-items: center;
             justify-content: center;
             height: 60vh;
-            background: linear-gradient(to right, rgba(31, 69, 61, 0.9), rgba(31, 69, 61, 0.7)),
-                        url("../static/images/image reg.jpg") center/cover no-repeat;
+            background-color: #1f453d00;
             text-align: center;
             padding: 50px;          
         }
@@ -173,31 +172,29 @@
         }
 
         .about-text h3 {
-            font-size: 28px;
+            font-size: 30px;
             color: #1f453d;
             margin-bottom: 10px;
         }
 
         .about-text p {
-            font-size: 16px;
+            font-size: 20px;
             line-height: 1.8;
         }
 
-        .about-image {
-            flex: 1;
-            text-align: center;
-        }
+       
 
-        .about-image img {
-            width: 90%;
-            max-width: 400px;
-            border-radius: 10px;
-            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+        .shared-bg {
+            background: linear-gradient(to right, rgba(31, 69, 61, 0.9), rgba(31, 69, 61, 0.7)),
+                        url("../static/images/image reg.jpg") center/cover no-repeat;
+            background-attachment: fixed; /* Makes it stay fixed when scrolling */
+            background-size: cover;
+            background-position: center;
         }
 
         /* Features Section */
         .features {
-            background-color: #e0e0c8;
+            background-color: #1f453d00;
             padding: 50px;
             text-align: center;
         }
@@ -220,7 +217,7 @@
         .feature-item {
             flex: 1;
             min-width: 250px;
-            background-color: white;
+            background-color: #f5f5dcc8;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
@@ -252,11 +249,11 @@
         }
 
         .creator-item img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
+            width: 250px;
+            height: 200px;
+            border-radius: 0%;
             object-fit: cover;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            
         }
 
         .creator-item p {
@@ -287,11 +284,12 @@
 
     <!-- Navbar -->
     <div class="navbar">
-        <a href = "#"> Go to the website</a>
+        
+        <a href="{{ url_for('home') }}">Go to the website</a>
     </div>
 
     <!-- Hero Section -->
-    <section class="hero"><center>
+    <section class="hero shared-bg"><center>
         
         
         <div class="fixed-title">stumbl</div>
@@ -300,19 +298,17 @@
     </section>
 
     <!-- About Us Section -->
-    <section class="about-container">
+    <section class="about-container"><center>
         <div class="about-text">
-            <h3>HIIIIIIIIIIIIII</h3>
+            <h3>What is <b>stumbl</b>?</h3>
             <p>Collaboration and peer support play a vital role in academic success, yet students often struggle to find accessible assistance or interdisciplinary opportunities. Stumbl bridges this gap with a platform that fosters meaningful academic connections.</p>
-        </div>
-        <div class="about-image">
-            <img src="https://source.unsplash.com/400x300/?team,collaboration" alt="Team Collaboration">
-        </div>
+        </div></center>
+       
     </section>
 
     <!-- Features Section -->
-    <section class="features">
-        <h3>Key Features</h3>
+    <section class="features shared-bg">
+        <h3 style="color : #f7eece">KEY FEATURES</h3>
         <div class="feature-list">
             <div class="feature-item">
                 <h4>📌 Personalized Profiles</h4>
@@ -335,19 +331,22 @@
 
     <!-- Creators Section -->
     <section class="creators">
-        <h3>Meet the Creators</h3>
+        <h3>Meet the stumbl Team</h3><br><Br>
         <div class="creator-list">
             <div class="creator-item">
-                <img src="creator1.jpg" alt="Creator 1">
-                <p>John Doe - Co-Founder & Lead Developer</p>
+                <img src="{{ url_for('static', filename='images/creator1.png') }}" alt="Creator 1">
+
+                <p><b>TApanvi Srivastava</b></p>
             </div>
             <div class="creator-item">
-                <img src="creator2.jpg" alt="Creator 2">
-                <p>Jane Smith - Co-Founder & UX Designer</p>
+                <img src="{{ url_for('static', filename='images/creator2.png') }}" alt="Creator 2">
+
+                <p><b>Nigel Mondal</b></p>
             </div>
             <div class="creator-item">
-                <img src="creator3.jpg" alt="Creator 3">
-                <p>Michael Lee - Backend Developer</p>
+                <img src="{{ url_for('static', filename='images/creator3.png') }}" alt="Creator 3">
+
+                <p><b>Twinkle Dhingra</b></p>
             </div>
         </div>
     </section>

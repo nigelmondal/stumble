@@ -33,10 +33,12 @@
 
         <!-- Buddy List -->
         <div id="buddyList" data-current-user-id="{{ session['user_id'] }}" class="friends-list">
-            <h2>Your Buddies</h2>
+            <h2>Your Buddies</h2><br>
             <div class="buddy-list">
                 {% for buddy in buddies %}
-                    <a href="#" class="buddy {% if loop.first %}active{% endif %}" data-buddy-id="{{ buddy.user_id }}">{{ buddy.full_name }}</a><br>
+                    <a href="#" class="buddy {% if loop.first %}active{% endif %}" data-buddy-id="{{ buddy.user_id }}">
+                        {{ buddy.full_name }}
+                    </a>
                 {% endfor %}
             </div>
         </div>

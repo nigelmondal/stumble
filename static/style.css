@@ -27,7 +27,7 @@ html, body {
     margin: 0;
     font-family: 'Numans', serif;
     background-color: #F5F5DC;
-    overflow: hidden;
+    overflow: auto;
     height : 100%;
 }
 
@@ -61,6 +61,15 @@ html, body {
     color :#F5F5DC;
     
 }
+
+.footer {
+    background-color: #1f453d;
+    color: #f5f5dc;
+    text-align: center;
+    padding: 15px;
+    margin-top: 50px;
+}
+
 
 
 

@@ -125,12 +125,17 @@ html, body {
 }
 
 .friends-list {
-    width: 25%;
+    
     background-color: #F5F5DC;
     padding: 20px;
     box-sizing: border-box;
-    border-right: 2px solid #1f453d;
+    width: 400px;
     overflow-y: auto;
+    font-size: 25px;
+}
+
+.friends-list a:link {
+    color: #1f453d; /* Change this to your desired color */
 }
 
 .chat-area {
@@ -153,11 +158,31 @@ html, body {
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
-    background: #F5F5DC;
+    background: #F5F5DC; /* Beige background */
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #1f453d;
+    display: flex; 
+    flex-direction: column;
+    position: relative; /* Allows layering */
+    z-index: 1;
 }
+
+/* Overlay the translucent background image */
+.chat-messages::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("../static/images/image reg.jpg") center/cover no-repeat;
+    background-attachment: fixed;
+    opacity: 0.3; /* Adjust transparency (0 = invisible, 1 = fully visible) */
+    z-index: -1;
+    border-radius: 5px;
+}
+
 
 .message {
     margin: 5px 0;
@@ -167,17 +192,18 @@ html, body {
     font-size: 18px;
 }
 
-.message.received {
-    background-color: #1f453d48;
-    align-self: flex-start;
-
-}
-
 .message.sent {
     background-color: #1f453d;
     color: #F5F5DC;
-    align-self: flex-end;
+    align-self: flex-end; /* Move sent messages to the left */
 }
+
+.message.received {
+    background-color: #1f453d48;
+    color: black;
+    align-self: flex-start; /* Move received messages to the right */
+}
+
 
 .chat-input {
     display: flex;
@@ -237,3 +263,29 @@ html, body {
     color:rgb(158, 158, 145); /* Change this to your desired color */
     text-decoration: underline;
 }
+
+.buddy-list a {
+    display: flex;
+    align-items: center;
+    background: rgba(31, 69, 61, 0.3); /* Translucent background */
+    padding: 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #1f453d;
+    font-size: 20px;
+    font-weight: bold;
+    transition: background 0.3s ease-in-out;
+    margin: 10px;
+}
+
+.buddy-list a:hover {
+    background: rgba(31, 69, 61, 0.5); /* Darker on hover */
+}
+
+.buddy-list a::before {
+    content: "👤"; /* Silhouette icon */
+    font-size: 22px;
+    margin-right: 10px;
+    margin-top: 2px;
+}
+

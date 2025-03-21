@@ -117,26 +117,27 @@ function renderCalendar() {
     }
 
       // 3) Fetch data from server: /get_meetings?year=YYYY&month=MM
-    fetch(`/get_meetings?year=${currentYear}&month=${currentMonthIndex + 1}`)
+      fetch(`/get_meetings?year=${currentYear}&month=${currentMonthIndex + 1}&_=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
                 let dayDiv = document.createElement("div");
                 dayDiv.className = "day";
                 dayDiv.dataset.date = dateStr;
+
                 let dateLabel = document.createElement('div');
-dateLabel.innerHTML = `<strong>${day}</strong>`;
-dateLabel.className = "date-label";
+                dateLabel.innerHTML = `<strong>${day}</strong>`;
+                dateLabel.className = "date-label";
 
-let meetingsContainer = document.createElement('div'); 
-            meetingsContainer.className = "meetings-container";
+                let meetingsContainer = document.createElement('div'); 
+                meetingsContainer.className = "meetings-container";
 
-dayDiv.appendChild(dateLabel);
-            dayDiv.appendChild(meetingsContainer);
+                dayDiv.appendChild(dateLabel);
+                dayDiv.appendChild(meetingsContainer);
 
-            // If server returned meetings for this date:
+                // ✅✅✅ FIX GOES HERE!
                 if (data[dateStr]) {
                     let meetingsForDay = data[dateStr];
 
@@ -144,7 +145,10 @@ dayDiv.appendChild(dateLabel);
                         let meetingDiv = document.createElement("div");
                         meetingDiv.className = "meeting";
 
-                // Some color variety
+                        // ✅ USE 'buddy' AS BACKEND RETURNS IT AS 'buddy'
+                        meetingDiv.innerHTML = `<strong>${mtg.buddy}</strong> @ ${mtg.time}`;
+
+                        // Color styling (optional)
                         let colors = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#8A2BE2", "#FF4500"];
                         let meetingColor = colors[index % colors.length];
 
@@ -155,8 +159,7 @@ dayDiv.appendChild(dateLabel);
                         meetingDiv.style.marginTop = "5px";
                         meetingDiv.style.fontSize = "14px";
 
-                        meetingDiv.innerHTML = `<strong>${mtg.buddy}</strong> @ ${mtg.time}`;
-
+                        // Delete button:
                         let deleteBtn = document.createElement("button");
                         deleteBtn.textContent = "❌";
                         deleteBtn.style.marginLeft = "5px";
@@ -164,17 +167,18 @@ dayDiv.appendChild(dateLabel);
                         deleteBtn.style.background = "transparent";
                         deleteBtn.style.cursor = "pointer";
                         deleteBtn.style.color = "white";
-                deleteBtn.addEventListener("click", (e) => {
+
+                        deleteBtn.addEventListener("click", (e) => {
                             e.stopPropagation();
                             deleteMeeting(mtg.meeting_id);
-                });
+                        });
 
                         meetingDiv.appendChild(deleteBtn);
                         meetingsContainer.appendChild(meetingDiv);
                     });
                 }
 
-            // Clicking on a day: open the schedule modal
+                // Clicking day to open modal
                 dayDiv.addEventListener("click", () => {
                     document.getElementById("appointmentDate").value = dateStr;
                     appointmentModal.style.display = "block";
@@ -183,7 +187,8 @@ dayDiv.appendChild(dateLabel);
                 calendarGrid.appendChild(dayDiv);
             }
         })
-        .catch(err => console.error("Error loading meetings:", err));
+
+        
 }
 
 
@@ -234,6 +239,15 @@ function deleteMeeting(meetingId) {
             let buddy_id = document.getElementById("stumbleBuddy").value;
             let description = document.getElementById("appointmentDescription").value;
             let time = document.getElementById("appointmentTime").value;
+            
+            const selectedDate = new Date(date);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0); // Ignore time portion
+
+        if (selectedDate < todayDate) {
+            alert("You cannot schedule a meeting before today's date!");
+            return;
+        }
 
             fetch("/add_meeting", {
                 method: "POST",
@@ -244,13 +258,48 @@ function deleteMeeting(meetingId) {
             .then(data => {
                 if (data.status === "success") {
                     appointmentModal.style.display = "none";
-                    renderCalendar(); // Refresh
+
+                    // 💥 DIRECTLY update calendar UI here:
+                    const dateStr = date;
+                    const dayDiv = document.querySelector(`.day[data-date='${dateStr}']`);
+
+                    if (dayDiv) {
+                        const meetingsContainer = dayDiv.querySelector(".meetings-container");
+
+                        const meetingDiv = document.createElement("div");
+                        meetingDiv.className = "meeting";
+
+                        // Color coding based on buddy_id:
+                        const colors = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#8A2BE2", "#FF4500"];
+                        const colorIndex = parseInt(buddy_id) % colors.length;
+                        const meetingColor = colors[colorIndex];
+
+                        meetingDiv.style.backgroundColor = meetingColor;
+                        meetingDiv.style.color = "white";
+                        meetingDiv.style.padding = "5px";
+                        meetingDiv.style.borderRadius = "5px";
+                        meetingDiv.style.marginTop = "5px";
+                        meetingDiv.style.fontSize = "14px";
+
+                        // Get buddy's name from dropdown
+                        const buddySelect = document.getElementById("stumbleBuddy");
+                        const buddyName = buddySelect.options[buddySelect.selectedIndex].text;
+
+                        // Add content
+                        meetingDiv.innerHTML = `<strong>${buddyName}</strong> @ ${time}`;
+
+                        // Append meeting to that day
+                        meetingsContainer.appendChild(meetingDiv);
+                    }
+
                 } else {
                     alert("Error adding meeting: " + JSON.stringify(data));
                 }
             })
             .catch(err => console.error("Error scheduling meeting:", err));
         });
+
+
 
     // Initial render
         renderCalendar();
